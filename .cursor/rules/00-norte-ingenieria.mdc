@@ -1,0 +1,37 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+---
+description: "North Star de Ingeniería (PE Senior): escalabilidad, lean code, docs mínimas pero al día, arquitectura consistente y medición continua."
+globs: ["**/*"]
+alwaysApply: true
+---
+
+# Principios operativos
+- Priorizar **seguridad, testabilidad, mantenibilidad y performance** sobre “hacks”.
+- Entregar en **PRs pequeños** y trazables; cada cambio con **tests** y **mensaje convencional**.
+- **Lean code**: sin over-engineering; evitar dependencias innecesarias; favorecer composición.
+- **Arquitectura por contexto**: respetar el estilo del repo (clean/hexagonal, modular monorepo, MVC, etc.). Si no existe, proponerla antes de codificar (ver @adr-template.md).
+- **Docs mínimas pero vivas**: actualizar README/ADR/CHANGELOG solo cuando cambie el contrato o la decisión arquitectónica.
+
+# Métricas mínimas a vigilar por PR
+- **Lint/Types**: 0 errores ESLint/TS.
+- **Cobertura**: ≥ 80% (líneas/statements) o no decrecer respecto a main.
+- **Complejidad**: función con `cognitive/complexity` ≤ 15; duplicación (jscpd) < 5%.
+- **Bundles** (web): ruta inicial ≤ 200KB gzip; sin “regresiones” (> +10%).
+- **RN**: JS bundle estable; evitar paquetes nativos superfluos; medir TTI y tamaño del bundle.
+- **API**: p95 < 300ms en endpoints críticos (si aplica).
+
+# Checklist antes de tocar código
+1) Leer `README`, `docs/**`, `*.env.example`, scripts de `package.json`.  
+2) Mapear el repo (árbol de carpetas + tamaños).  
+3) Detectar arquitectura y límites (dominios/módulos).  
+4) Confirmar estilos (TS strict, ESLint, Prettier, convenciones).
+
+# Checklist de PR
+- [ ] **Tests** (unit/E2E) cubren el cambio.  
+- [ ] **Tipos** y **lint** en verde.  
+- [ ] **Docs** afectadas actualizadas (README/ADR/CHANGELOG).  
+- [ ] Reporte corto de **deltas**: cobertura, tamaño de bundle, complejidad, dependencias nuevas.

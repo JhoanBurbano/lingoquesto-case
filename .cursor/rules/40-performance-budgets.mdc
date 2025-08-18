@@ -1,0 +1,24 @@
+---
+description: 
+globs: src/**
+alwaysApply: false
+---
+---
+description: "Performance budgets and optimization practices."
+globs: ["apps/**", "packages/**", "src/**"]
+alwaysApply: false
+---
+
+- **Web Performance Budgets**
+  - Initial route ≤ 200KB gzip, initial chunk ≤ 150KB, main-thread blocking < 250ms.
+  - Use code-splitting, `dynamic import()`, and "islands"/lazy in heavy views.
+  - Avoid heavy libraries if there are alternatives < 10KB (see bundle analyzer).
+
+- **RN Performance Budgets**
+  - Minimize JS bundle and natives; remove unused packages.
+  - Avoid extra renders (memo/`useCallback`/`useMemo`); use `FlashList`/`RecyclerListView` for lists if applicable.
+
+- **Suggested Commands**
+  - Web: `npm run build && npx source-map-explorer 'dist/**/*.js'`
+  - Vite: add plugin `rollup-plugin-visualizer` for reports.
+  - RN: `npx react-native bundle --platform ios --dev false --entry-file index.js --bundle-output out.jsbundle`

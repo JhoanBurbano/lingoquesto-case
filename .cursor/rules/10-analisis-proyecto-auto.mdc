@@ -1,0 +1,43 @@
+---
+description: Auto-análisis integral del repo y plan de mejoras ejecutable.
+globs: 
+alwaysApply: false
+---
+---
+description: "Auto-análisis integral del repo y plan de mejoras ejecutable."
+globs: ["**/*"]
+alwaysApply: false
+---
+
+# Cuando te pida “Analiza el proyecto”
+Sigue este plan y **devuelve en secciones** con comandos concretos:
+
+1) **Mapa del repo**
+   - Genera un árbol resumido (profundidad 3–4) con tamaños aproximados.
+   - Identifica frameworks (Vue/React/Expo, Node/Express/Fastify, etc.), toolchain (Vite/Webpack, Vitest/Jest, ESLint), y tipos de tests.
+
+2) **Arquitectura y límites**
+   - Dibuja (ASCII) capas/módulos/domínios y dependencias. Señala ciclos o límites rotos.
+   - Propón modularización (carpetas, barreras, nombres) y un plan de migración incremental.
+
+3) **Calidad y seguridad**
+   - Comandos propuestos:
+     - Lint/Tipos: `npm run lint && npm run typecheck` (o equivalentes).
+     - Código muerto: `npx knip` o `npx depcheck`.
+     - Dependencias y grafos: `npx madge src --image graph.svg` o `npx dependency-cruiser`.
+     - Duplicación: `npx jscpd --reporters console`.
+     - Secret scan: `npx gitleaks detect` o `npx trufflehog filesystem .`.
+
+4) **Pruebas**
+   - Framework sugerido (Vitest/Jest + Testing Library; Detox/Playwright para RN/web).
+   - Ubicación/co-locación de tests y **focos de cobertura** faltante.
+   - Script estándar: `npm run test:coverage` con umbrales.
+
+5) **Performance**
+   - Web: sugiere medir con Lighthouse/`vite-bundle-visualizer`/`source-map-explorer`.
+   - RN: `react-native bundle` + analyzer, revisar TTI/startup, re-renders y mem leaks.
+   - Define **budgets** y qué optimizar (lazy-loading, memoización, split-chunks).
+
+6) **Entregables**
+   - Lista de **tickets** (priorizados), diffs propuestos, tests nuevos, y **ADRs** si cambia arquitectura.
+   - Actualizaciones mínimas de **README/CHANGELOG**.

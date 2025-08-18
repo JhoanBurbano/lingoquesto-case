@@ -1,0 +1,22 @@
+<!-- eslint-disable @typescript-eslint/no-unused-vars -->
+<script setup lang="ts">
+import { inject } from 'vue'
+import { ALERT_DIALOG_CTX } from './alertDialogContext'
+import { buttonVariants } from '@/components/atoms/buttonVariants'
+import { cn } from '@/utils'
+
+const props = defineProps<{ class?: string }>()
+const ctx = inject(ALERT_DIALOG_CTX)
+if (!ctx) throw new Error('AlertDialogAction must be used within AlertDialog')
+
+const onClick = (e: MouseEvent) => {
+  // permite que el usuario maneje onClick externo y luego cerramos
+  ctx.close()
+}
+</script>
+
+<template>
+  <button :class="cn(buttonVariants(), $props.class)" type="button" @click="onClick">
+    <slot />
+  </button>
+</template>

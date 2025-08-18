@@ -1,0 +1,14 @@
+---
+description: 
+globs: CHANGELOG.md,docs/**,README.md
+alwaysApply: false
+---
+---
+description: "Documentación mínima pero actualizada: README, ADRs, CHANGELOG."
+globs: ["README.md", "docs/**", "CHANGELOG.md"]
+alwaysApply: false
+---
+
+- **README**: propósito, cómo correr, scripts, env vars, estructura de carpetas, decisiones clave.
+- **ADR**: para cambios de arquitectura o dependencias relevantes. Usa `docs/adr/XXXX-titulo.md` con contexto, alternativas, decisión, consecuencias.
+- **CHANGELOG**: mantener por **versionado semántico**. Mensajes de commit con **Conventional Commits**.

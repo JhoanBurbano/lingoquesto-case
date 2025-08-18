@@ -1,0 +1,17 @@
+---
+description: 
+globs: src/**/*.ts,src/**/*.tsx,src/**/*.vue
+alwaysApply: false
+---
+---
+description: "Reglas de calidad: tipos estrictos, lint sin errores, testing por contrato y co-locado."
+globs: ["src/**/*.{ts,tsx,vue,js,jsx}"]
+alwaysApply: false
+---
+
+- **TypeScript strict** obligatorio; no usar `any` salvo `// @ts-expect-error` justificado.
+- Preferir **tipos** sobre `interface` cuando compongan utilidades (`Pick/Omit/Partial/Readonly/NonNullable`).
+- **Testing**
+  - Unit + contract tests para servicios; Testing Library para UI (no testear implementación).
+  - Cobertura objetivo ≥ 80%; si no, adjuntar plan de subida con fechas.
+- **Refactor seguro**: antes/después corre `lint`, `typecheck`, `test:coverage`; no mezclar refactor + features en el mismo PR.
