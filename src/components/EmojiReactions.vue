@@ -16,9 +16,9 @@
     <!-- Add Reaction Button -->
     <button
       @click="showEmojiPicker = !showEmojiPicker"
-      class="p-1 rounded-full hover:bg-gray-100 transition-colors"
+      class="p-1 rounded-full bg-white/30 hover:bg-gray-100 transition-colors"
     >
-      <Plus class="w-4 h-4 text-gray-400" />
+      <Plus class="w-4 h-4 text-black" />
     </button>
 
     <!-- Emoji Picker -->

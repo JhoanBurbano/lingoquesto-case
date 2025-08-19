@@ -12,7 +12,7 @@
             </span>
           </div>
 
-          <div v-if="message.audioUrl" class="flex items-center space-x-2">
+          <div v-if="message.audioUrl" class="flex items-start space-x-2">
             <button
               @click="handlePlayPause"
               class="w-8 h-8 p-0 rounded-lg transition-colors flex items-center justify-center"
@@ -23,36 +23,52 @@
             </button>
 
             <div class="flex-1">
-              <div class="w-full h-1 rounded-full overflow-hidden" :class="getProgressBarClasses()">
-                <div
-                  class="h-full transition-all duration-100"
-                  :class="getProgressFillClasses()"
-                  :style="{ width: `${progress}%` }"
-                />
+              <!-- Audio Waveform as Progress Bar -->
+              <div class="w-full h-8 rounded-lg overflow-hidden" :class="getProgressBarClasses()">
+                <div class="h-full flex items-center space-x-[1px] p-1">
+                  <div
+                    v-for="(bar, index) in waveformBars"
+                    :key="index"
+                    class="flex-1 transition-all duration-100 rounded-[2px] m-[1px]"
+                    :class="getWaveformBarClasses(index)"
+                    :style="{
+                      height: `${bar.height}%`,
+                      opacity: index < currentBarIndex ? 1 : 0.6,
+                    }"
+                  />
+                </div>
               </div>
+
+              <!-- Time Display -->
               <div class="text-xs mt-1" :class="getSecondaryTextClasses()">
-                {{ formatDuration(currentTime) }} / {{ formatDuration(audioDuration) }}
+                <span v-if="isValidTime(currentTime)">
+                  {{ formatDuration(currentTime) }}
+                  <span v-if="isValidTime(audioDuration)">
+                    / {{ formatDuration(audioDuration) }}</span
+                  >
+                </span>
+                <span v-else :class="isOwn ? 'text-white/70' : 'text-gray-500'">
+                  Cargando audio...
+                </span>
               </div>
             </div>
 
-            <button
-              @click="handleRestart"
-              class="w-6 h-6 p-0 rounded transition-colors flex items-center justify-center"
-              :class="getRestartButtonClasses()"
-            >
-              <RotateCcw class="w-3 h-3" />
-            </button>
+            <!-- Playback Speed Control -->
+            <div class="flex flex-col items-center space-y-1">
+              <button
+                @click="cyclePlaybackSpeed"
+                class="w-6 h-6 p-0 rounded transition-colors flex items-center justify-center text-xs font-medium"
+                :class="getSpeedButtonClasses()"
+                :title="`Velocidad: ${currentPlaybackSpeed}x`"
+              >
+                {{ currentPlaybackSpeed }}x
+              </button>
+            </div>
           </div>
 
           <!-- Emoji Reactions -->
-          <div class="pt-2">
+          <div>
             <EmojiReactions :message="message" />
-          </div>
-
-          <div v-if="message.audioUrl" class="flex items-center justify-between">
-            <span class="text-xs" :class="getSecondaryTextClasses()">
-              Velocidad: {{ store.playbackSpeed }}x
-            </span>
           </div>
         </div>
       </div>
@@ -64,6 +80,7 @@
       :ref="(el) => registerAudio(el as HTMLAudioElement)"
       @timeupdate="handleTimeUpdate"
       @ended="handleEnded"
+      @loadedmetadata="handleLoadedMetadata"
       preload="metadata"
     />
   </div>
@@ -73,7 +90,8 @@
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 
 import { useVoiceChatStore } from '@/stores/voiceChat'
-import { Play, Pause, RotateCcw } from 'lucide-vue-next'
+import { Play, Pause } from 'lucide-vue-next'
+import { toast } from 'vue-sonner'
 import type { VoiceMessage } from '@/types/voice-chat'
 import EmojiReactions from './EmojiReactions.vue'
 
@@ -95,21 +113,65 @@ const currentTime = ref(0)
 const audioDuration = ref(0)
 const audioElement = ref<HTMLAudioElement | null>(null)
 const isPlaying = ref(false)
+const currentPlaybackSpeed = ref(1.0)
+
+// Playback speed options
+const playbackSpeeds = [0.5, 0.75, 1.0, 1.25, 1.5, 2.0]
+
+// Waveform visualization
+const waveformBars = ref(Array.from({ length: 20 }, () => ({ height: Math.random() * 60 + 20 })))
 
 // Computed
-const progress = computed(() => {
-  if (audioDuration.value <= 0) return 0
-  return (currentTime.value / audioDuration.value) * 100
+const currentBarIndex = computed(() => {
+  if (audioDuration.value <= 0 || !isFinite(audioDuration.value)) return 0
+  if (currentTime.value <= 0 || !isFinite(currentTime.value)) return 0
+
+  const progress = currentTime.value / audioDuration.value
+  if (!isFinite(progress)) return 0
+
+  return Math.floor(progress * waveformBars.value.length)
 })
 
 // Methods
 const registerAudio = (el: HTMLAudioElement | null) => {
   audioElement.value = el
   if (el) {
-    el.playbackRate = store.playbackSpeed
+    el.playbackRate = currentPlaybackSpeed.value
   }
 }
 
+const handleLoadedMetadata = () => {
+  if (audioElement.value) {
+    const duration = audioElement.value.duration
+
+    // Set duration if valid, otherwise keep it at 0
+    if (duration && isFinite(duration) && duration > 0) {
+      audioDuration.value = duration
+    }
+
+    // Generate waveform
+    generateWaveform()
+  }
+}
+
+const generateWaveform = () => {
+  // Generate static waveform bars for visual consistency
+  waveformBars.value = Array.from({ length: 20 }, (_, index) => ({
+    height: 30 + Math.sin(index * 0.3) * 20 + Math.random() * 10,
+  }))
+}
+
+const cyclePlaybackSpeed = () => {
+  const currentIndex = playbackSpeeds.indexOf(currentPlaybackSpeed.value)
+  const nextIndex = (currentIndex + 1) % playbackSpeeds.length
+  currentPlaybackSpeed.value = playbackSpeeds[nextIndex]
+
+  if (audioElement.value) {
+    audioElement.value.playbackRate = currentPlaybackSpeed.value
+  }
+}
+
+// Audio validation utilities
 const handlePlayPause = async () => {
   if (!props.message.audioUrl) return
 
@@ -118,6 +180,7 @@ const handlePlayPause = async () => {
     const audioUrl = store.getAudioUrl(props.message.audioUrl)
     if (!audioUrl) {
       console.error('❌ Could not get audio URL for playback')
+      toast.error('Error al cargar el audio')
       return
     }
 
@@ -130,7 +193,7 @@ const handlePlayPause = async () => {
       isPlaying.value = false
       store.stopPlaying()
     } else {
-      // Start playback
+      // Start playback - simplified without validation
       if (audioElement.value) {
         audioElement.value.src = audioUrl
         audioElement.value.play()
@@ -140,28 +203,24 @@ const handlePlayPause = async () => {
     }
   } catch (error) {
     console.error('❌ Error handling audio playback:', error)
+    toast.error('Error al reproducir el audio')
   }
 }
 
 const handleTimeUpdate = () => {
   if (audioElement.value) {
-    currentTime.value = audioElement.value.currentTime
+    const time = audioElement.value.currentTime
+    // Simplified validation - just ensure it's a positive number
+    if (time >= 0) {
+      currentTime.value = time
+    }
   }
 }
 
 const handleEnded = () => {
   emit('pause')
   currentTime.value = 0
-}
-
-const handleRestart = () => {
-  if (audioElement.value) {
-    audioElement.value.currentTime = 0
-    currentTime.value = 0
-    if (props.message.isPlaying) {
-      audioElement.value.play()
-    }
-  }
+  isPlaying.value = false
 }
 
 const formatTime = (timestamp: number) => {
@@ -187,9 +246,20 @@ const formatTime = (timestamp: number) => {
 }
 
 const formatDuration = (time: number) => {
+  // Simplified validation
+  if (time < 0 || !isFinite(time)) {
+    return '0:00'
+  }
+
   const minutes = Math.floor(time / 60)
   const seconds = Math.floor(time % 60)
+
   return `${minutes}:${seconds.toString().padStart(2, '0')}`
+}
+
+// Helper function to validate time values - simplified
+const isValidTime = (time: number) => {
+  return time >= 0 && isFinite(time)
 }
 
 // Styling methods
@@ -223,29 +293,29 @@ const getPlayButtonClasses = () => {
 
 const getProgressBarClasses = () => {
   if (props.isOwn) {
-    return 'bg-white/30'
+    return 'bg-white/10'
   }
   return 'bg-gray-200'
 }
 
-const getProgressFillClasses = () => {
+const getWaveformBarClasses = (index: number) => {
   if (props.isOwn) {
-    return 'bg-white'
+    return index < currentBarIndex.value ? 'bg-white' : 'bg-white/60'
   }
-  return 'bg-primary'
+  return index < currentBarIndex.value ? 'bg-primary' : 'bg-gray-400'
 }
 
-const getRestartButtonClasses = () => {
+const getSpeedButtonClasses = () => {
   if (props.isOwn) {
-    return 'text-white/70 hover:text-white hover:bg-white/20'
+    return 'bg-white/20 hover:bg-white/30 text-white border-0'
   }
-  return 'text-gray-500 hover:text-gray-700'
+  return 'bg-gray-200 hover:bg-gray-300 text-gray-700 border-0'
 }
 
 // Lifecycle
 onMounted(() => {
   if (audioElement.value) {
-    audioElement.value.playbackRate = store.playbackSpeed
+    audioElement.value.playbackRate = currentPlaybackSpeed.value
   }
 })
 
@@ -255,12 +325,13 @@ onUnmounted(() => {
   }
 })
 
-// Watch for playback speed changes
+// Watch for playback speed changes from store
 watch(
   () => store.playbackSpeed,
   (newSpeed) => {
     if (audioElement.value) {
       audioElement.value.playbackRate = newSpeed
+      currentPlaybackSpeed.value = newSpeed
     }
   },
 )

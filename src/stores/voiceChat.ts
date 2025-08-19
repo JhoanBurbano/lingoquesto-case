@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import { supabase } from '@/lib/supabase'
 import type { ChatState, ChatUser, VoiceMessage, EmojiReaction } from '@/types/voice-chat'
 import { useAuthStore } from './auth'
+import { AudioProcessor, AudioValidator, AudioFormatUtils } from '@/utils/audioUtils'
 
 function uuid() {
   return crypto.randomUUID?.() ?? Math.random().toString(36).slice(2)
@@ -104,22 +105,21 @@ export const useVoiceChatStore = defineStore('voiceChat', {
         let audioUrl = partial.audioUrl
         if (audioUrl && audioUrl.startsWith('blob:')) {
           try {
-            console.log('🎵 Processing audio blob for upload...')
+            // Process blob for upload using the audio utilities
+            const { filePath } = await AudioProcessor.processBlobForUpload(audioUrl, this.user.id)
 
-            // Convert blob URL to File object
+            // Fetch the blob for upload
             const response = await fetch(audioUrl)
             const blob = await response.blob()
 
-            // Create file name with timestamp and user ID
-            const timestamp = Date.now()
-            const fileName = `audio_${timestamp}_${this.user.id}.wav`
-            const filePath = `${this.user.id}/${fileName}`
+            // Get format information
+            const { contentType } = AudioValidator.getSupportedFormat(blob.type)
 
             // Upload to Supabase Storage
             const { data: uploadData, error: uploadError } = await supabase.storage
               .from('voice-chat-audio')
               .upload(filePath, blob, {
-                contentType: 'audio/wav',
+                contentType,
                 cacheControl: '3600',
                 upsert: false,
               })
@@ -129,21 +129,21 @@ export const useVoiceChatStore = defineStore('voiceChat', {
               throw uploadError
             }
 
-            // Get public URL for the uploaded file
+            // Get public URL
             const { data: urlData } = supabase.storage
               .from('voice-chat-audio')
               .getPublicUrl(filePath)
 
             audioUrl = urlData.publicUrl
             console.log('✅ Audio uploaded to Supabase Storage:', audioUrl)
-
-            // Clean up the blob URL to prevent memory leaks
-            if (partial.audioUrl) {
-              URL.revokeObjectURL(partial.audioUrl)
-            }
           } catch (error) {
             console.error('❌ Error processing audio for upload:', error)
             audioUrl = undefined
+          } finally {
+            // Clean up the original blob URL
+            if (partial.audioUrl) {
+              AudioProcessor.cleanupBlobUrl(partial.audioUrl)
+            }
           }
         }
 
@@ -1045,16 +1045,19 @@ export const useVoiceChatStore = defineStore('voiceChat', {
     getAudioUrl(audioUrl: string): string | null {
       try {
         if (!audioUrl) {
+          console.warn('⚠️ getAudioUrl called with empty audioUrl')
           return null
         }
 
         // If it's already a Supabase Storage URL, return it directly
         if (audioUrl.includes('supabase.co') || audioUrl.includes('storage.googleapis.com')) {
+          console.log('✅ Returning Supabase Storage URL:', audioUrl)
           return audioUrl
         }
 
         // If it's a blob URL, it might be from a recent recording
         if (audioUrl.startsWith('blob:')) {
+          console.log('✅ Returning blob URL:', audioUrl)
           return audioUrl
         }
 
@@ -1063,6 +1066,8 @@ export const useVoiceChatStore = defineStore('voiceChat', {
           const base64Audio = localStorage.getItem(audioUrl)
           if (base64Audio) {
             try {
+              console.log('🔄 Converting legacy audio from localStorage:', audioUrl)
+
               const binaryString = atob(base64Audio)
               const bytes = new Uint8Array(binaryString.length)
               for (let i = 0; i < binaryString.length; i++) {
@@ -1078,6 +1083,8 @@ export const useVoiceChatStore = defineStore('voiceChat', {
               console.error('❌ Error converting legacy audio:', error)
               return null
             }
+          } else {
+            console.warn('⚠️ Legacy audio not found in localStorage:', audioUrl)
           }
         }
 
