@@ -265,9 +265,7 @@ const error = ref('')
 
 // Computed
 const showTestCredentials = computed(() => {
-  return (
-    import.meta.env.DEV && import.meta.env.VITE_TEST_EMAIL && import.meta.env.VITE_TEST_PASSWORD
-  )
+  return import.meta.env.VITE_TEST_EMAIL && import.meta.env.VITE_TEST_PASSWORD
 })
 
 // Handle form submission
