@@ -201,6 +201,8 @@ onMounted(() => {
 </script>
 
 <style scoped>
+@reference '../styles/globals.css';
+
 .voice-chat-room {
   @apply max-w-4xl mx-auto p-6 space-y-6;
 }
