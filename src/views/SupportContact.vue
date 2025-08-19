@@ -55,6 +55,27 @@
 
     <!-- Main Content -->
     <div class="relative z-10 container mx-auto px-4 py-8 max-w-4xl">
+      <!-- Navigation Header -->
+      <div class="flex justify-between items-center mb-8">
+        <!-- Back to Home Button -->
+        <router-link
+          :to="authStore.isAuthenticated ? '/dashboard' : '/welcome'"
+          class="inline-flex items-center space-x-2 px-4 py-2 bg-white/80 backdrop-blur-sm border border-gray-200 rounded-xl text-gray-600 hover:bg-white hover:text-gray-800 transition-all transform hover:scale-105 shadow-sm"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M10 19l-7-7m0 0l7-7m-7 7h18"
+            ></path>
+          </svg>
+          <span class="font-medium">
+            {{ authStore.isAuthenticated ? 'Volver al Dashboard' : 'Volver al Inicio' }}
+          </span>
+        </router-link>
+      </div>
+
       <!-- Header Section -->
       <div class="text-center mb-8">
         <!-- Lingosto Character -->
@@ -68,7 +89,9 @@
         <h1 class="text-4xl font-sat-bold text-gray-800 mb-2">Hola, {{ userName }}!</h1>
 
         <!-- Main Question -->
-        <h2 class="text-2xl font-sat-semibold text-gray-800">¿Cómo podemos ayudarte hoy?</h2>
+        <h2 class="text-2xl font-sat-semibold text-gray-800">
+          Soy Lingosto ¿Cómo puedo ayudarte hoy?
+        </h2>
       </div>
 
       <!-- Main Input Area -->
@@ -282,16 +305,21 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import { useVoiceChatStore } from '@/stores/voiceChat'
+import { useAuthStore } from '@/stores/auth'
 import LingoCharacter from '@/components/atoms/LingoCharacter.vue'
 
-const store = useVoiceChatStore()
-const supportMessage = ref('')
+const authStore = useAuthStore()
 
-// Get personalized user name
+// Get personalized user name from auth store
 const userName = computed(() => {
-  return store.user?.name || 'LingoQuesto'
+  if (authStore.isAuthenticated && authStore.profile) {
+    return authStore.profile.full_name?.split(' ')[0] || authStore.user?.email || 'Usuario'
+  }
+  return 'Usuario'
 })
+
+// Support message state
+const supportMessage = ref('')
 
 // Example templates
 const exampleTemplates = {
@@ -307,27 +335,29 @@ const useExample = (templateKey: keyof typeof exampleTemplates) => {
   supportMessage.value = exampleTemplates[templateKey]
 }
 
+// Submit support request
 const submitSupportRequest = () => {
   if (!supportMessage.value.trim()) {
-    alert('Por favor ingresa un mensaje antes de enviar.')
+    alert('Por favor, escribe tu mensaje de soporte.')
     return
   }
 
-  // En un entorno real, aquí enviarías la solicitud al backend
-  if (import.meta.env?.MODE !== 'production') {
-    console.log('Support request submitted:', {
-      user: store.user,
-      message: supportMessage.value,
-      timestamp: new Date().toISOString(),
-    })
-  }
+  // Here you would typically send the support request to your backend
+  console.log('Support request submitted:', {
+    message: supportMessage.value,
+    user: authStore.isAuthenticated
+      ? {
+          id: authStore.user?.id,
+          email: authStore.user?.email,
+          name: authStore.profile?.full_name,
+        }
+      : 'Anonymous',
+  })
 
-  // Mensaje de éxito
-  alert(
-    '¡Gracias! Tu solicitud de soporte ha sido enviada. Te responderemos en las próximas 24 horas.',
-  )
+  // Show success message
+  alert('¡Gracias por tu mensaje! Nos pondremos en contacto contigo pronto.')
 
-  // Limpiar el mensaje
+  // Clear the message
   supportMessage.value = ''
 }
 </script>

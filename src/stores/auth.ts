@@ -135,10 +135,12 @@ export const useAuthStore = defineStore('auth', () => {
         }
       } else {
         profile.value = data
+        console.log('✅ Profile loaded successfully:', data)
       }
     } catch (err) {
       error.value = err instanceof Error ? err.message : 'Error fetching profile'
       console.error('Profile fetch error:', err)
+      // Don't throw here, just log the error
     }
   }
 
