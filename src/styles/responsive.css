@@ -1,0 +1,322 @@
+/* Responsive Design Utilities */
+@layer utilities {
+  /* Mobile-first responsive classes */
+  .container-responsive {
+    @apply w-full px-4 mx-auto;
+  }
+
+  .container-responsive-sm {
+    @apply sm:px-6;
+  }
+
+  .container-responsive-lg {
+    @apply lg:px-8;
+  }
+
+  .container-responsive-xl {
+    @apply xl:px-12;
+  }
+
+  /* Responsive grid layouts */
+  .grid-responsive {
+    @apply grid grid-cols-1 gap-4;
+  }
+
+  .grid-responsive-sm {
+    @apply sm:grid-cols-2 sm:gap-6;
+  }
+
+  .grid-responsive-md {
+    @apply md:grid-cols-3;
+  }
+
+  .grid-responsive-lg {
+    @apply lg:grid-cols-4;
+  }
+
+  /* Responsive spacing */
+  .space-responsive {
+    @apply space-y-4;
+  }
+
+  .space-responsive-sm {
+    @apply sm:space-y-6;
+  }
+
+  .space-responsive-lg {
+    @apply lg:space-y-8;
+  }
+
+  /* Responsive text sizes */
+  .text-responsive {
+    @apply text-sm;
+  }
+
+  .text-responsive-sm {
+    @apply sm:text-base;
+  }
+
+  .text-responsive-lg {
+    @apply lg:text-lg;
+  }
+
+  .text-responsive-xl {
+    @apply xl:text-xl;
+  }
+
+  /* Responsive padding */
+  .p-responsive {
+    @apply p-4;
+  }
+
+  .p-responsive-sm {
+    @apply sm:p-6;
+  }
+
+  .p-responsive-lg {
+    @apply lg:p-8;
+  }
+
+  /* Responsive margins */
+  .m-responsive {
+    @apply m-4;
+  }
+
+  .m-responsive-sm {
+    @apply sm:m-6;
+  }
+
+  .m-responsive-lg {
+    @apply lg:m-8;
+  }
+
+  /* Responsive flexbox */
+  .flex-responsive {
+    @apply flex flex-col;
+  }
+
+  .flex-responsive-sm {
+    @apply sm:flex-row;
+  }
+
+  /* Responsive sidebar */
+  .sidebar-mobile {
+    @apply fixed inset-y-0 left-0 z-50 w-80 transform transition-transform duration-300 ease-in-out;
+  }
+
+  .sidebar-mobile-open {
+    @apply translate-x-0;
+  }
+
+  .sidebar-mobile-closed {
+    @apply translate-x-full;
+  }
+
+  .sidebar-desktop {
+    @apply relative w-80 transition-all duration-500 ease-in-out;
+  }
+
+  .sidebar-desktop-collapsed {
+    @apply w-20;
+  }
+
+  /* Sidebar desktop animación al cambiar a mobile */
+  .sidebar-desktop-to-mobile {
+    @apply w-0 opacity-0 pointer-events-none transition-all duration-500 ease-in-out;
+  }
+
+  /* Mobile sidebar - completamente fuera del flujo del layout */
+  .sidebar-mobile-overlay {
+    @apply fixed inset-y-0 left-0 z-50 w-80 transition-transform duration-300 ease-in-out border-r border-gray-200 bg-white;
+  }
+
+  .sidebar-mobile-overlay-open {
+    @apply transform translate-x-0;
+  }
+
+  .sidebar-mobile-overlay-closed {
+    @apply transform -translate-x-full;
+  }
+
+  /* Main content en mobile - ocupa todo el ancho */
+  .main-mobile {
+    @apply flex-1 w-full transition-all duration-500 ease-in-out;
+  }
+
+  /* Main content en desktop - se ajusta al sidebar */
+  .main-desktop {
+    @apply flex-1 transition-all duration-500 ease-in-out;
+  }
+
+  /* Floating toggle button */
+  .sidebar-toggle-floating {
+    @apply absolute -right-4 top-8 z-50 w-8 h-8  shadow-lg bg-gray-700 hover:bg-black text-white hover:text-[#d1c4ff] transition-all duration-200;
+  }
+
+  .sidebar-toggle-floating:hover {
+    @apply shadow-xl transform scale-105;
+  }
+
+  .sidebar-toggle-floating:active {
+    @apply transform scale-95;
+  }
+
+  /* Sidebar collapsed state improvements */
+  .sidebar-collapsed .nav-item {
+    @apply justify-center px-0;
+  }
+
+  .sidebar-collapsed .nav-icon {
+    @apply w-full flex items-center justify-center;
+  }
+
+  .sidebar-collapsed .nav-text {
+    @apply hidden;
+  }
+
+  /* Responsive overlay */
+  .overlay-mobile {
+    @apply fixed inset-0 bg-black/50 z-40 lg:hidden;
+  }
+
+  /* Responsive header */
+  .header-mobile {
+    @apply sticky top-0 z-30 bg-white border-b border-gray-200 px-4 py-3 lg:hidden;
+  }
+
+  /* Responsive content */
+  .content-mobile {
+    @apply flex-1 w-full;
+  }
+
+  .content-desktop {
+    @apply flex-1;
+  }
+
+  /* Responsive navigation */
+  .nav-mobile {
+    @apply flex flex-col space-y-2;
+  }
+
+  .nav-desktop {
+    @apply flex items-center space-x-4;
+  }
+
+  /* Responsive buttons */
+  .btn-mobile {
+    @apply w-full justify-center;
+  }
+
+  .btn-desktop {
+    @apply w-auto;
+  }
+
+  /* Responsive cards */
+  .card-mobile {
+    @apply p-4;
+  }
+
+  .card-desktop {
+    @apply p-6;
+  }
+
+  /* Responsive forms */
+  .form-mobile {
+    @apply space-y-4;
+  }
+
+  .form-desktop {
+    @apply space-y-6;
+  }
+
+  /* Responsive tables */
+  .table-mobile {
+    @apply block overflow-x-auto;
+  }
+
+  .table-desktop {
+    @apply table w-full;
+  }
+
+  /* Responsive modals */
+  .modal-mobile {
+    @apply w-full h-full max-w-none max-h-none rounded-none;
+  }
+
+  .modal-desktop {
+    @apply w-auto h-auto max-w-2xl max-h-96 rounded-lg;
+  }
+}
+
+/* Responsive breakpoint indicators (for debugging) */
+@layer components {
+  .breakpoint-indicator {
+    @apply fixed bottom-4 right-4 z-50 px-3 py-1 text-xs font-mono bg-black text-white rounded;
+  }
+
+  .breakpoint-indicator::before {
+    content: 'xs';
+  }
+
+  @media (min-width: 640px) {
+    .breakpoint-indicator::before {
+      content: 'sm';
+    }
+  }
+
+  @media (min-width: 768px) {
+    .breakpoint-indicator::before {
+      content: 'md';
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .breakpoint-indicator::before {
+      content: 'lg';
+    }
+  }
+
+  @media (min-width: 1280px) {
+    .breakpoint-indicator::before {
+      content: 'xl';
+    }
+  }
+
+  @media (min-width: 1536px) {
+    .breakpoint-indicator::before {
+      content: '2xl';
+    }
+  }
+}
+
+/* Smooth transitions for responsive changes */
+@layer base {
+  * {
+    @apply transition-all duration-200 ease-in-out;
+  }
+
+  /* Disable transitions for specific properties that shouldn't animate */
+  .no-transition {
+    @apply transition-none;
+  }
+
+  /* Custom scrollbar for mobile */
+  @media (max-width: 1023px) {
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: rgba(156, 163, 175, 0.5);
+      border-radius: 3px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(156, 163, 175, 0.7);
+    }
+  }
+}

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed } from 'vue'
 
 import Button from '@/components/atoms/Button.vue'
 import Badge from '@/components/atoms/Badge.vue'
@@ -19,8 +19,6 @@ import {
   Target,
   Calendar,
   Award,
-  ChevronLeft,
-  ChevronRight,
   Plus,
   Bell,
   FileText,
@@ -43,16 +41,17 @@ interface NavigationSection {
   items: NavigationItem[]
 }
 
-const emit = defineEmits<{
-  (e: 'toggle'): void
-  (e: 'sectionChange', section: string): void
+const props = defineProps<{
+  isCollapsed: boolean
+  currentSection: string
+  isMobile?: boolean
 }>()
 
-const onToggle = () => emit('toggle')
+defineEmits<{
+  (e: 'sectionChange', section: string): void
+}>()
 const router = useRouter()
 const route = useRoute()
-
-const isCollapsed = ref(false)
 
 const isActive = (to: string) => route.path === to || route.path.startsWith(to + '/')
 
@@ -144,6 +143,14 @@ const navigationSections = computed<NavigationSection[]>(() => [
         to: '/slides',
         active: isActive('/slides'),
       },
+      {
+        id: 'responsive-test',
+        label: 'Responsive Test',
+        icon: FileText,
+        gradient: 'from-[#FFAF54] to-[#967AFE]',
+        to: '/responsive-test',
+        active: isActive('/responsive-test'),
+      },
     ],
   },
 ])
@@ -151,15 +158,44 @@ const navigationSections = computed<NavigationSection[]>(() => [
 const onSectionChange = (to: string) => router.replace(to)
 const contactSupport = () => router.push('/support')
 
-// const isMobile = computed(() => window.matchMedia('(max-width: 1024px)').matches)
+// Computed values for responsive behavior
+const sidebarWidth = computed(() => {
+  if (props.isMobile) return 'w-80'
+  return props.isCollapsed ? 'w-20' : 'w-80'
+})
+
+const headerContent = computed(() => {
+  if (props.isMobile) return true
+  return !props.isCollapsed
+})
+
+const showQuickActions = computed(() => {
+  if (props.isMobile) return true
+  return !props.isCollapsed
+})
+
+const showSectionTitles = computed(() => {
+  if (props.isMobile) return true
+  return !props.isCollapsed
+})
+
+const showLabels = computed(() => {
+  if (props.isMobile) return true
+  return !props.isCollapsed
+})
+
+const showFooterContent = computed(() => {
+  if (props.isMobile) return true
+  return !props.isCollapsed
+})
 </script>
 
 <template>
   <div
-    v-motion
-    :animate="{ width: isCollapsed ? 80 : 280 }"
-    :transition="{ duration: 0.3, ease: 'ease-in-out' }"
-    class="relative bg-white border-r border-gray-50 shadow-none flex flex-col h-full overflow-hidden"
+    :class="[
+      'relative bg-white border-r border-gray-200 shadow-none flex flex-col h-full overflow-hidden transition-all duration-300 ease-in-out',
+      sidebarWidth,
+    ]"
   >
     <!-- Decorative background -->
     <div class="absolute inset-0 bg-gradient-to-b from-[#F9F6FF] to-white" />
@@ -167,8 +203,8 @@ const contactSupport = () => router.push('/support')
 
     <!-- Header -->
     <div class="relative z-10 p-6 border-b border-gray-100">
-      <div class="flex items-center justify-between">
-        <template v-if="!isCollapsed">
+      <div class="flex items-center justify-center">
+        <template v-if="headerContent">
           <div
             v-motion
             :initial="{ opacity: 0, x: -20 }"
@@ -196,22 +232,12 @@ const contactSupport = () => router.push('/support')
             <LingoLogo class="w-8 h-8" />
           </div>
         </template>
-
-        <Button
-          variant="ghost"
-          size="sm"
-          @click="onToggle"
-          class="p-2 hover:bg-[#967AFE]/10 text-gray-600 hover:text-[#967AFE]"
-        >
-          <ChevronRight v-if="isCollapsed" class="w-4 h-4" />
-          <ChevronLeft v-else class="w-4 h-4" />
-        </Button>
       </div>
     </div>
 
     <!-- Quick Actions -->
     <div
-      v-if="!isCollapsed"
+      v-if="showQuickActions"
       v-motion
       :initial="{ opacity: 0, y: 10 }"
       :enter="{ opacity: 1, y: 0 }"
@@ -227,7 +253,7 @@ const contactSupport = () => router.push('/support')
     <div class="relative z-10 flex-1 overflow-y-auto overflow-x-hidden py-4">
       <div v-for="(section, sectionIndex) in navigationSections" :key="section.title" class="mb-6">
         <div
-          v-if="!isCollapsed"
+          v-if="showSectionTitles"
           v-motion
           :initial="{ opacity: 0, x: -10 }"
           :enter="{ opacity: 1, x: 0 }"
@@ -253,20 +279,29 @@ const contactSupport = () => router.push('/support')
               variant="ghost"
               @click="onSectionChange(item.to)"
               :class="[
-                'w-full justify-start relative overflow-hidden transition-all duration-200',
-                isCollapsed ? 'px-0 justify-center' : 'px-3',
+                'w-full relative overflow-hidden transition-all duration-200',
+                isMobile
+                  ? 'px-3 justify-start'
+                  : isCollapsed
+                    ? 'px-0 justify-center'
+                    : 'px-3 justify-start',
                 item.active
                   ? `bg-gradient-to-r ${item.gradient || 'from-[#967AFE] to-[#48D19C]'} text-white shadow-lg`
                   : 'hover:bg-[#967AFE]/10 text-gray-700 hover:text-[#967AFE]',
               ]"
             >
               <!-- Icon -->
-              <div :class="['flex items-center', isCollapsed ? '' : 'mr-3']">
+              <div
+                :class="[
+                  'flex items-center justify-center',
+                  isMobile || !isCollapsed ? 'mr-3' : 'w-full',
+                ]"
+              >
                 <component :is="item.icon" class="w-5 h-5" />
               </div>
 
               <!-- Label and Badge -->
-              <template v-if="!isCollapsed">
+              <template v-if="showLabels">
                 <div
                   v-motion
                   :initial="{ opacity: 0, width: 0 }"
@@ -290,27 +325,26 @@ const contactSupport = () => router.push('/support')
                   </Badge>
                 </div>
               </template>
-
-              <!-- Active indicator -->
-              <div
-                v-if="item.active"
-                class="absolute right-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-white rounded-l-full"
-              />
             </Button>
           </div>
         </div>
 
-        <Separator v-if="sectionIndex < navigationSections.length - 1" class="my-4 mx-6" />
+        <Separator
+          v-if="sectionIndex < navigationSections.length - 1 && showSectionTitles"
+          class="my-4 mx-6"
+        />
       </div>
     </div>
 
     <!-- Footer -->
     <div class="relative z-10 border-t border-gray-100 p-4">
       <!-- Personaje y Ayuda -->
-      <div :class="['flex items-center gap-3 mb-4', isCollapsed ? 'justify-center' : '']">
+      <div
+        :class="['flex items-center gap-3 mb-4', isMobile || !isCollapsed ? '' : 'justify-center']"
+      >
         <LingoCharacter variant="happy" class="w-8 h-8 flex-shrink-0" :animated="true" />
 
-        <template v-if="!isCollapsed">
+        <template v-if="showFooterContent">
           <div
             v-motion
             :initial="{ opacity: 0, x: -10 }"
@@ -338,14 +372,21 @@ const contactSupport = () => router.push('/support')
           variant="ghost"
           @click="onSectionChange('/notifications')"
           :class="[
-            'w-full justify-start',
-            isCollapsed ? 'px-0 justify-center' : 'px-3',
+            'w-full relative overflow-hidden transition-all duration-200',
+            isMobile || !isCollapsed ? 'px-3 justify-start' : 'px-0 justify-center',
             'hover:bg-[#967AFE]/10 text-gray-700 hover:text-[#967AFE]',
           ]"
         >
-          <Bell class="w-5 h-5" />
+          <div
+            :class="[
+              'flex items-center justify-center',
+              isMobile || !isCollapsed ? 'mr-3' : 'w-full',
+            ]"
+          >
+            <Bell class="w-5 h-5" />
+          </div>
           <span
-            v-if="!isCollapsed"
+            v-if="showLabels"
             v-motion
             :initial="{ opacity: 0, width: 0 }"
             :enter="{ opacity: 1, width: 'auto' }"
@@ -361,14 +402,21 @@ const contactSupport = () => router.push('/support')
           variant="ghost"
           @click="onSectionChange('/settings')"
           :class="[
-            'w-full justify-start',
-            isCollapsed ? 'px-0 justify-center' : 'px-3',
+            'w-full relative overflow-hidden transition-all duration-200',
+            isMobile || !isCollapsed ? 'px-3 justify-start' : 'px-0 justify-center',
             'hover:bg-[#967AFE]/10 text-gray-700 hover:text-[#967AFE]',
           ]"
         >
-          <SettingsIcon class="w-5 h-5" />
+          <div
+            :class="[
+              'flex items-center justify-center',
+              isMobile || !isCollapsed ? 'mr-3' : 'w-full',
+            ]"
+          >
+            <SettingsIcon class="w-5 h-5" />
+          </div>
           <span
-            v-if="!isCollapsed"
+            v-if="showLabels"
             v-motion
             :initial="{ opacity: 0, width: 0 }"
             :enter="{ opacity: 1, width: 'auto' }"

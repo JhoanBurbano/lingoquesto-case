@@ -11,15 +11,6 @@
         class="flex items-center gap-4 mb-6 sm:mb-8"
       >
         <!-- Mobile sidebar toggle -->
-        <Button
-          v-if="isMobile"
-          variant="ghost"
-          size="sm"
-          @click="toggleMobileSidebar"
-          class="p-2 hover:bg-[#967AFE]/10 text-gray-600 hover:text-[#967AFE]"
-        >
-          <Menu class="w-5 h-5" />
-        </Button>
 
         <Button
           variant="ghost"
@@ -517,7 +508,6 @@ import {
   Award,
   Target,
   Volume2,
-  Menu,
 } from 'lucide-vue-next'
 
 // UI base
@@ -584,7 +574,7 @@ interface Props {
   onBack: () => void
 }
 
-const { isMobile, toggleMobileSidebar } = useSidebar()
+const { isMobile } = useSidebar()
 
 const { student, onBack } = defineProps<Props>()
 const tab = ref<'overview' | 'voice' | 'progress' | 'recommendations'>('overview')

@@ -579,9 +579,7 @@ const confirmAssignBadge = () => {
             <h3 class="text-xl font-semibold text-gray-900 mb-6">Ranking de Estudiantes</h3>
 
             <!-- Podium de Estudiantes -->
-            <div
-              class="flex flex-col sm:flex-row justify-center items-end gap-6 sm:gap-8 mb-8 relative z-10"
-            >
+            <div class="flex flex-row justify-center items-end gap-6 sm:gap-8 mb-8 relative z-10">
               <!-- Segundo Lugar (Left) -->
               <div class="flex flex-col items-center sm:order-1">
                 <div class="relative">

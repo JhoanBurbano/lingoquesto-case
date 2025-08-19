@@ -1,7 +1,7 @@
 <template>
   <div class="min-h-screen bg-gradient-to-br from-[#F9F6FF] to-[#E8F8F5]">
     <!-- Vista detalle -->
-    <div v-if="selectedStudentData" class="container mx-auto sm:px-6 py-6 sm:py-8">
+    <div v-if="selectedStudentData" class="container mx-auto px-4 sm:px-6 py-6 sm:py-8">
       <StudentDetailView :student="selectedStudentData" :onBack="() => (selectedStudent = null)" />
     </div>
 
@@ -17,37 +17,26 @@
           :enter="{ opacity: 1, y: 0 }"
           class="flex items-center justify-between mb-6 sm:mb-8"
         >
-          <div class="flex items-center gap-3 sm:gap-4">
-            <!-- Mobile sidebar toggle -->
-            <Button
-              v-if="isMobile"
-              variant="ghost"
-              size="sm"
-              @click="toggleMobileSidebar"
-              class="p-2 hover:bg-[#967AFE]/10 text-gray-600 hover:text-[#967AFE]"
-            >
-              <Menu class="w-5 h-5" />
-            </Button>
-
-            <div class="flex items-center gap-3 sm:gap-4">
+          <div class="flex flex-col sm:flex-row items-center gap-4">
+            <div class="flex items-center gap-8 sm:gap-4">
               <LingoLogo class="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12" />
               <div>
                 <h1 class="font-sat-bold text-lg sm:text-xl lg:text-2xl xl:text-3xl text-gray-900">
-                  {{ isMobile ? 'Dashboard' : 'Dashboard del Profesor' }}
+                  Dashboard del Profesor
                 </h1>
                 <p class="text-gray-600 text-xs sm:text-sm lg:text-base">
-                  {{
-                    isMobile
-                      ? 'Gestión avanzada de estudiantes'
-                      : 'Gestión avanzada y análisis detallado de estudiantes'
-                  }}
+                  Gestión avanzada y análisis detallado de estudiantes
                 </p>
               </div>
             </div>
           </div>
 
-          <div class="flex items-center gap-2 sm:gap-3">
-            <LingoCharacter variant="happy" class="w-8 h-8 sm:w-10 sm:h-10" :animated="false" />
+          <div class="flex flex-row-reverse sm:flex-row items-center gap-2 sm:gap-3">
+            <LingoCharacter
+              variant="happy"
+              class="hidden sm:block w-8 h-8 sm:w-10 sm:h-10"
+              :animated="false"
+            />
 
             <!-- Support Link -->
             <router-link
@@ -62,14 +51,15 @@
                   d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                 ></path>
               </svg>
-              <span v-if="!isMobile">Soporte</span>
+              <span class="hidden sm:inline">Soporte</span>
             </router-link>
 
-            <GradientButton variant="primary" size="sm" :class="isMobile ? 'px-3' : ''">
+            <GradientButton variant="primary" size="sm">
               <template #icon>
                 <Plus class="w-4 h-4" />
               </template>
-              {{ isMobile ? 'Nuevo' : 'Nuevo Estudiante' }}
+              <span class="hidden sm:inline">Nuevo Estudiante</span>
+              <span class="sm:hidden">Nuevo</span>
             </GradientButton>
           </div>
         </div>
@@ -98,10 +88,8 @@
             icon="users"
             gradient="from-[#48D19C] to-[#9AD0F0]"
             context="participación 100%"
-            description="Todos los estudiantes participando"
-            :change="0"
-            changeLabel="vs. mes anterior"
             :showGradientAccent="true"
+            :change="8"
           />
 
           <MetricCard
@@ -110,9 +98,8 @@
             icon="mic"
             gradient="from-[#FFAF54] to-[#FBEB6F]"
             context="por estudiante este mes"
-            :change="15"
-            changeLabel="vs. mes anterior"
             :showGradientAccent="true"
+            :change="15"
           />
 
           <MetricCard
@@ -121,66 +108,9 @@
             icon="target"
             gradient="from-[#967AFE] to-[#FFAF54]"
             context="nivel promedio"
-            :change="8"
-            changeLabel="mejora mensual"
             :showGradientAccent="true"
+            :change="8"
           />
-        </div>
-
-        <!-- Progress Distribution -->
-        <div
-          v-motion
-          :initial="{ opacity: 0, y: 20 }"
-          :enter="{ opacity: 1, y: 0 }"
-          :delay="0.15"
-          class="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8"
-        >
-          <div class="bg-gradient-to-r from-green-500 to-emerald-500 rounded-2xl p-6 text-white">
-            <div class="flex items-center justify-between mb-2">
-              <h3 class="font-['Satoshi',sans-serif] font-semibold">Buen Progreso</h3>
-              <div class="bg-white/20 text-white border-0 px-2 py-1 rounded text-xs font-medium">
-                {{
-                  Math.round(
-                    (metrics.progressDistribution.excellent / metrics.totalStudents) * 100,
-                  )
-                }}%
-              </div>
-            </div>
-            <p class="text-2xl font-bold mb-1">
-              {{ metrics.progressDistribution.excellent }} estudiantes
-            </p>
-            <p class="text-white/80 text-sm">Score ≥ 80 puntos</p>
-          </div>
-
-          <div class="bg-gradient-to-r from-yellow-500 to-orange-500 rounded-2xl p-6 text-white">
-            <div class="flex items-center justify-between mb-2">
-              <h3 class="font-['Satoshi',sans-serif] font-semibold">Progreso Medio</h3>
-              <div class="bg-white/20 text-white border-0 px-2 py-1 rounded text-xs font-medium">
-                {{ Math.round((metrics.progressDistribution.good / metrics.totalStudents) * 100) }}%
-              </div>
-            </div>
-            <p class="text-2xl font-bold mb-1">
-              {{ metrics.progressDistribution.good }} estudiantes
-            </p>
-            <p class="text-white/80 text-sm">Score 60-79 puntos</p>
-          </div>
-
-          <div class="bg-gradient-to-r from-red-500 to-pink-500 rounded-2xl p-6 text-white">
-            <div class="flex items-center justify-between mb-2">
-              <h3 class="font-['Satoshi',sans-serif] font-semibold">Necesita Atención</h3>
-              <div class="bg-white/20 text-white border-0 px-2 py-1 rounded text-xs font-medium">
-                {{
-                  Math.round(
-                    (metrics.progressDistribution.needsAttention / metrics.totalStudents) * 100,
-                  )
-                }}%
-              </div>
-            </div>
-            <p class="text-2xl font-bold mb-1">
-              {{ metrics.progressDistribution.needsAttention }} estudiantes
-            </p>
-            <p class="text-white/80 text-sm">Score menores a 60 puntos</p>
-          </div>
         </div>
 
         <!-- Filters -->
@@ -189,13 +119,13 @@
           :initial="{ opacity: 0, y: 20 }"
           :enter="{ opacity: 1, y: 0 }"
           :delay="0.2"
-          class="mb-8"
+          class="mb-6 sm:mb-8"
         >
           <StudentsFilters
             :filters="filters"
-            :onFiltersChange="handleFiltersChange"
-            :totalStudents="metrics.totalStudents"
-            :filteredCount="filteredStudents.length"
+            :on-filters-change="handleFiltersChange"
+            :total-students="metrics.totalStudents"
+            :filtered-count="filteredStudents.length"
           />
         </div>
 
@@ -214,9 +144,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, onMounted, onBeforeUnmount } from 'vue'
-import { Plus, Menu } from 'lucide-vue-next'
-import Button from '../components/atoms/Button.vue'
+import { ref, reactive, computed } from 'vue'
+import { Plus } from 'lucide-vue-next'
 import StudentsFilters, { type FilterState } from './StudentsFilters.vue'
 import StudentsViews from '@/views/StudentsViews.vue'
 import StudentDetailView from './StudentDetailView.vue'
@@ -227,36 +156,6 @@ import GradientButton from '@/components/molecules/GradientButton.vue'
 import DecorativePattern from '@/components/atoms/DecorativePattern.vue'
 import { STUDENTS_DATA, calculateOverallMetrics } from '../data/students'
 import { filterStudents, sortStudents } from '@/utils/studentsTools'
-
-// Estado local para sidebar móvil
-const isMobile = ref(false)
-const isMobileSidebarOpen = ref(false)
-
-// Función para detectar si es móvil
-const updateIsMobile = () => {
-  if (typeof window === 'undefined') return
-  isMobile.value = window.innerWidth < 1024
-}
-
-// Función para toggle del sidebar móvil
-const toggleMobileSidebar = () => {
-  if (!isMobile.value) return
-  isMobileSidebarOpen.value = !isMobileSidebarOpen.value
-}
-
-// Detectar cambios de tamaño de ventana
-onMounted(() => {
-  updateIsMobile()
-  if (typeof window !== 'undefined') {
-    window.addEventListener('resize', updateIsMobile)
-  }
-})
-
-onBeforeUnmount(() => {
-  if (typeof window !== 'undefined') {
-    window.removeEventListener('resize', updateIsMobile)
-  }
-})
 
 const selectedStudent = ref<string | null>(null)
 
