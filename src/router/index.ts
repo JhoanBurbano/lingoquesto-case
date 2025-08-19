@@ -8,6 +8,7 @@ const ComingSoon = () => import('../views/ComingSoon.vue')
 const HeroBanner = () => import('../views/HeroBanner.vue')
 const Achievements = () => import('../views/Achievements.vue')
 const ResponsiveTest = () => import('../views/ResponsiveTest.vue')
+const VoiceChatView = () => import('../views/VoiceChatView.vue')
 
 const routes: RouteRecordRaw[] = [
   { path: '/', redirect: '/welcome' },
@@ -82,6 +83,7 @@ const routes: RouteRecordRaw[] = [
   },
   { path: '/case-study', component: CaseStudyView, meta: { title: 'Case Study' } },
   { path: '/responsive-test', component: ResponsiveTest, meta: { title: 'Responsive Test' } },
+  { path: '/voice-chat', component: VoiceChatView, meta: { title: 'Voice Chat' } },
 ]
 
 const router = createRouter({ history: createWebHistory(), routes })

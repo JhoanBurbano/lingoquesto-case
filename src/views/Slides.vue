@@ -29,7 +29,7 @@
       <!-- Navegación de slides -->
       <div class="flex items-center justify-center mb-8">
         <div
-          class="flex items-center gap-2 bg-white rounded-2xl shadow-lg border border-gray-100 p-2"
+          class="flex items-center gap-2 bg-white rounded-2xl shadow-lg border border-gray-100 p-2 z-10"
         >
           <Button
             @click="previousSlide"

@@ -17,9 +17,15 @@
     "lint:oxlint": "oxlint . --fix -D correctness --ignore-path .gitignore",
     "lint:eslint": "eslint . --fix",
     "lint": "run-s lint:*",
-    "format": "prettier --write src/"
+    "format": "prettier --write src/",
+    "setup:env": "node scripts/setup-env.js",
+    "cleanup:connections": "node scripts/cleanup-connections.js",
+    "test:cleanup": "node scripts/test-cleanup.js",
+    "test:messages": "node scripts/test-messages.js",
+    "setup:storage": "node scripts/setup-storage.js"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.55.0",
     "@tailwindcss/vite": "^4.1.12",
     "@vueuse/motion": "^3.0.3",
     "class-variance-authority": "^0.7.1",

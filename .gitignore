@@ -33,3 +33,6 @@ test-results/
 playwright-report/
 
 /to-migration-only/
+
+.env
+.env.*

@@ -18,7 +18,7 @@
               class="w-8 h-8 p-0 rounded-lg transition-colors flex items-center justify-center"
               :class="getPlayButtonClasses()"
             >
-              <Pause v-if="message.isPlaying" class="w-4 h-4" />
+              <Pause v-if="isPlaying" class="w-4 h-4" />
               <Play v-else class="w-4 h-4" />
             </button>
 
@@ -94,6 +94,7 @@ const store = useVoiceChatStore()
 const currentTime = ref(0)
 const audioDuration = ref(0)
 const audioElement = ref<HTMLAudioElement | null>(null)
+const isPlaying = ref(false)
 
 // Computed
 const progress = computed(() => {
@@ -109,16 +110,36 @@ const registerAudio = (el: HTMLAudioElement | null) => {
   }
 }
 
-const handlePlayPause = () => {
-  if (!audioElement.value) return
+const handlePlayPause = async () => {
+  if (!props.message.audioUrl) return
 
-  if (props.message.isPlaying) {
-    audioElement.value.pause()
-    emit('pause')
-  } else {
-    emit('play', props.message.id)
-    audioElement.value.currentTime = currentTime.value
-    audioElement.value.play()
+  try {
+    // Get the actual audio URL for playback
+    const audioUrl = store.getAudioUrl(props.message.audioUrl)
+    if (!audioUrl) {
+      console.error('❌ Could not get audio URL for playback')
+      return
+    }
+
+    if (isPlaying.value) {
+      // Stop playback
+      if (audioElement.value) {
+        audioElement.value.pause()
+        audioElement.value.currentTime = 0
+      }
+      isPlaying.value = false
+      store.stopPlaying()
+    } else {
+      // Start playback
+      if (audioElement.value) {
+        audioElement.value.src = audioUrl
+        audioElement.value.play()
+        isPlaying.value = true
+        store.activeMessageId = props.message.id
+      }
+    }
+  } catch (error) {
+    console.error('❌ Error handling audio playback:', error)
   }
 }
 

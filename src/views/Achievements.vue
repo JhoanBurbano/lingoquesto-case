@@ -397,13 +397,13 @@ const getBadgeById = (id: string) => {
   return badges.find((badge) => badge.id === id)
 }
 
-const formatDate = (date: string) => {
-  return new Date(date).toLocaleDateString('es-ES', {
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric',
-  })
-}
+// const formatDate = (date: string) => {
+//   return new Date(date).toLocaleDateString('es-ES', {
+//     day: 'numeric',
+//     month: 'short',
+//     year: 'numeric',
+//   })
+// }
 
 const assignBadge = (badge: { id: string }) => {
   selectedBadgeForAssignment.value = badge.id

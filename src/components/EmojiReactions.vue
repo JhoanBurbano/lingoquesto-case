@@ -83,7 +83,7 @@ const hasUserReacted = (emoji: string) => {
 
 const addReaction = (emoji: string) => {
   if (hasUserReacted(emoji)) {
-    store.removeReaction(props.message.id, emoji)
+    store.removeReaction(props.message.id, emoji, store.user?.id || '')
   } else {
     store.addReaction(props.message.id, emoji)
   }
