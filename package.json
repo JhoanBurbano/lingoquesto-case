@@ -19,6 +19,7 @@
     "lint": "run-s lint:*",
     "format": "prettier --write src/",
     "setup:env": "node scripts/setup-env.js",
+    "setup:test-credentials": "node scripts/setup-test-credentials.js",
     "cleanup:connections": "node scripts/cleanup-connections.js",
     "test:cleanup": "node scripts/test-cleanup.js",
     "test:messages": "node scripts/test-messages.js",

@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { supabase } from '@/lib/supabase'
 import type { ChatState, ChatUser, VoiceMessage, EmojiReaction } from '@/types/voice-chat'
+import { useAuthStore } from './auth'
 
 function uuid() {
   return crypto.randomUUID?.() ?? Math.random().toString(36).slice(2)
@@ -63,6 +64,19 @@ export const useVoiceChatStore = defineStore('voiceChat', {
     },
   },
   actions: {
+    // Initialize user from auth store
+    initializeFromAuth() {
+      const authStore = useAuthStore()
+      if (authStore.user && authStore.profile) {
+        this.user = {
+          id: authStore.user.id,
+          name: authStore.profile.full_name || authStore.user.email || 'Usuario',
+          role: authStore.profile.role,
+        }
+        console.log('✅ Voice chat user initialized from auth:', this.user)
+      }
+    },
+
     login(user: ChatUser) {
       this.user = user
       this._broadcast({ type: 'login', payload: user })
@@ -371,6 +385,18 @@ export const useVoiceChatStore = defineStore('voiceChat', {
       try {
         console.log('🚀 Attempting to join room:', roomId)
 
+        // Ensure user is initialized from auth
+        if (!this.user) {
+          this.initializeFromAuth()
+        }
+
+        if (!this.user) {
+          console.error('❌ No user available for joining room')
+          throw new Error('User not authenticated')
+        }
+
+        console.log('👤 Joining room as user:', this.user.name, 'ID:', this.user.id)
+
         // Get room details
         const { data: room, error: roomError } = await supabase
           .from('voice_chat_rooms')
@@ -391,7 +417,7 @@ export const useVoiceChatStore = defineStore('voiceChat', {
           .from('voice_chat_participants')
           .select('*')
           .eq('room_id', roomId)
-          .eq('user_id', this.user?.id)
+          .eq('user_id', this.user.id)
           .is('left_at', null)
           .single()
 
@@ -414,15 +440,14 @@ export const useVoiceChatStore = defineStore('voiceChat', {
           }
         } else {
           // Join as new participant
-          const userId = this.user?.id || uuid()
-          console.log('👤 Creating new participant record with ID:', userId)
+          console.log('👤 Creating new participant record for user:', this.user.name)
 
           const { error: participantError } = await supabase
             .from('voice_chat_participants')
             .insert({
               room_id: roomId,
-              user_id: userId,
-              username: this.user?.name || 'Anonymous',
+              user_id: this.user.id,
+              username: this.user.name,
               is_speaking: false,
               audio_level: 0,
             })
@@ -554,11 +579,20 @@ export const useVoiceChatStore = defineStore('voiceChat', {
           return
         }
 
-        this.participants = (data || []).map((p) => ({
-          id: p.user_id,
-          name: p.username,
-          role: 'student',
-        }))
+        // Filter out duplicate participants and ensure valid data
+        const uniqueParticipants = (data || [])
+          .filter(
+            (p, index, arr) =>
+              arr.findIndex((participant) => participant.user_id === p.user_id) === index,
+          )
+          .filter((p) => p.user_id && p.username)
+          .map((p) => ({
+            id: p.user_id,
+            name: p.username,
+            role: 'student',
+          }))
+
+        this.participants = uniqueParticipants
 
         console.log(
           '✅ Loaded',
@@ -566,6 +600,9 @@ export const useVoiceChatStore = defineStore('voiceChat', {
           'participants:',
           this.participants.map((p) => p.name),
         )
+
+        // Broadcast participants update
+        this._broadcast({ type: 'participantsUpdate', payload: this.participants })
       } catch (error) {
         console.error('❌ Error loading participants:', error)
       }

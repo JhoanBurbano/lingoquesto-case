@@ -175,16 +175,16 @@ import Badge from '@/components/atoms/Badge.vue'
 import LingoCharacter from '@/components/atoms/LingoCharacter.vue'
 import DecorativePattern from '@/components/atoms/DecorativePattern.vue'
 import { Play, Sparkles, MessageCircle, Users, BookOpen } from 'lucide-vue-next'
-import { useSidebar } from '@/composables/useSidebar'
+import { useRouter } from 'vue-router'
 
-const { setCurrentSection } = useSidebar()
+const router = useRouter()
 
 const onNavigateToDashboard = () => {
-  setCurrentSection('dashboard')
+  router.replace('/dashboard')
 }
 
 const onNavigateToSlides = () => {
-  setCurrentSection('slides')
+  router.replace('/slides')
 }
 
 const features = [

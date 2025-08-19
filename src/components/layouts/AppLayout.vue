@@ -3,9 +3,12 @@ import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue'
 import LingoSidebar from '@/components/LingoSidebar.vue'
 import { RouterView } from 'vue-router'
 import { provideSidebar } from '@/composables/useSidebar'
+import { useAuthStore } from '@/stores/auth'
 
-import { Menu, X, ChevronRight, ChevronLeft } from 'lucide-vue-next'
+import { Menu, X, ChevronRight, ChevronLeft, LogOut, User } from 'lucide-vue-next'
 import Button from '@/components/atoms/Button.vue'
+
+const authStore = useAuthStore()
 
 const isCollapsed = ref(false)
 const currentSection = ref('dashboard')
@@ -41,6 +44,16 @@ function handleSectionChange(section: string) {
   // Close mobile sidebar after navigation
   if (isMobileWorking.value) {
     isMobileSidebarOpen.value = false
+  }
+}
+
+// Handle logout
+async function handleLogout() {
+  try {
+    await authStore.signOut()
+    // Router will automatically redirect to login due to auth guard
+  } catch (error) {
+    console.error('Logout error:', error)
   }
 }
 
@@ -99,15 +112,15 @@ watch(isMobileWorking, (newIsMobile) => {
   <div :class="layoutClasses">
     <!-- Mobile overlay for smooth animation -->
     <div
-      v-if="isMobileWorking"
+      v-if="isMobileWorking && authStore.isAuthenticated"
       class="fixed inset-0 bg-black/50 z-40 lg:hidden transition-all duration-300 ease-out pointer-events-none"
       :class="isMobileSidebarOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0'"
       @click="isMobileSidebarOpen = false"
     />
 
-    <!-- Sidebar - En mobile está fuera del flujo del layout -->
+    <!-- Sidebar - Solo mostrar si está autenticado -->
     <aside
-      v-if="!isMobileWorking"
+      v-if="!isMobileWorking && authStore.isAuthenticated"
       :class="[
         'sidebar-container transition-all duration-500 ease-in-out border-r border-border bg-sidebar text-sidebar-foreground relative',
         sidebarClasses,
@@ -130,9 +143,9 @@ watch(isMobileWorking, (newIsMobile) => {
       </div>
     </aside>
 
-    <!-- Mobile Sidebar - Completamente separado del layout -->
+    <!-- Mobile Sidebar - Solo mostrar si está autenticado -->
     <aside
-      v-if="isMobileWorking"
+      v-if="isMobileWorking && authStore.isAuthenticated"
       :class="[
         'fixed inset-y-0 left-0 z-50 w-80 border-r border-gray-200 bg-white sidebar-mobile-overlay shadow-2xl',
         isMobileSidebarOpen
@@ -152,9 +165,9 @@ watch(isMobileWorking, (newIsMobile) => {
 
     <!-- Main content -->
     <main :class="['overflow-auto h-screen', isMobileWorking ? 'main-mobile' : 'main-desktop']">
-      <!-- Mobile header with toggle button -->
+      <!-- Mobile header with toggle button - Solo mostrar si está autenticado -->
       <div
-        v-if="isMobileWorking"
+        v-if="isMobileWorking && authStore.isAuthenticated"
         class="mobile-header sticky top-0 z-30 bg-white border-b border-gray-200 px-4 py-3 lg:hidden"
       >
         <div class="flex items-center justify-between">
@@ -177,8 +190,60 @@ watch(isMobileWorking, (newIsMobile) => {
             <span class="font-semibold text-gray-900">LingoQuesto</span>
           </div>
 
-          <div class="w-10"></div>
-          <!-- Spacer for centering -->
+          <!-- User Menu (Mobile) - Solo mostrar si está autenticado -->
+          <div class="flex items-center gap-2">
+            <div class="flex items-center gap-2 text-sm text-gray-600">
+              <User class="w-4 h-4" />
+              <span>{{ authStore.displayName }}</span>
+            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              @click="handleLogout"
+              class="p-2 hover:bg-red-50 text-gray-600 hover:text-red-600"
+              title="Cerrar sesión"
+            >
+              <LogOut class="w-4 h-4" />
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Desktop Header with User Info - Solo mostrar si está autenticado -->
+      <div
+        v-if="!isMobileWorking && authStore.isAuthenticated"
+        class="sticky top-0 z-30 bg-white border-b border-gray-200 px-6 py-4"
+      >
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <h1 class="text-xl font-semibold text-gray-900">{{ currentSection }}</h1>
+          </div>
+
+          <!-- User Menu (Desktop) - Solo mostrar si está autenticado -->
+          <div class="flex items-center gap-4">
+            <div class="flex items-center gap-3 text-sm text-gray-600">
+              <div
+                class="w-8 h-8 bg-gradient-to-r from-purple-500 to-blue-600 rounded-full flex items-center justify-center"
+              >
+                <span class="text-white font-bold text-xs">{{
+                  authStore.displayName.charAt(0).toUpperCase()
+                }}</span>
+              </div>
+              <div class="hidden md:block">
+                <p class="font-medium text-gray-900">{{ authStore.displayName }}</p>
+                <p class="text-xs text-gray-500 capitalize">{{ authStore.userRole }}</p>
+              </div>
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              @click="handleLogout"
+              class="flex items-center gap-2 hover:bg-red-50 hover:text-red-600 hover:border-red-200"
+            >
+              <LogOut class="w-4 h-4" />
+              <span class="hidden lg:inline">Cerrar sesión</span>
+            </Button>
+          </div>
         </div>
       </div>
 
