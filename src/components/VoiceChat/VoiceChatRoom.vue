@@ -201,7 +201,7 @@ onMounted(() => {
 </script>
 
 <style scoped>
-@reference '../styles/globals.css';
+@reference 'tailwindcss';
 
 .voice-chat-room {
   @apply max-w-4xl mx-auto p-6 space-y-6;
@@ -325,7 +325,7 @@ onMounted(() => {
 
 /* Modal Styles */
 .modal-overlay {
-  @apply fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50;
+  @apply fixed inset-0 bg-black/50 flex items-center justify-center z-50;
 }
 
 .modal-content {
