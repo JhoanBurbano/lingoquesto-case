@@ -27,12 +27,16 @@
     <AppLayout v-else>
       <router-view />
     </AppLayout>
+
+    <!-- Toast Notifications -->
+    <Toaster />
   </div>
 </template>
 
 <script setup lang="ts">
 import { onMounted, computed, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { Toaster } from 'vue-sonner'
 import AppLayout from './components/layouts/AppLayout.vue'
 import { useAuthStore } from './stores/auth'
 

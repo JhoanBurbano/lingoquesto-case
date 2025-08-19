@@ -274,6 +274,9 @@ export const useAuthStore = defineStore('auth', () => {
       session.value = null
       profile.value = null
       clearSessionFromStorage()
+
+      // Redirect to login immediately
+      window.location.href = '/auth/login'
     } catch (err) {
       error.value = err instanceof Error ? err.message : 'Error signing out'
       console.error('Sign out error:', err)

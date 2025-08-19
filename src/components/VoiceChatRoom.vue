@@ -107,9 +107,12 @@
             <div class="space-y-2">
               <div v-for="u in shownUsers" :key="u" class="flex items-center gap-2 text-sm">
                 <div class="w-2 h-2 bg-green-500 rounded-full" />
-                <span :class="u === nickname ? 'font-medium text-[#967AFE]' : 'text-gray-600'">{{
-                  u === nickname ? 'Tú' : u
-                }}</span>
+                <span
+                  :class="
+                    u === nickname.split(' ')[0] ? 'font-medium text-[#967AFE]' : 'text-gray-600'
+                  "
+                  >{{ u === nickname.split(' ')[0] ? 'Tú' : u }}</span
+                >
               </div>
               <p v-if="uniqueUsers.length > 5" class="text-xs text-gray-500">
                 +{{ uniqueUsers.length - 5 }} más…

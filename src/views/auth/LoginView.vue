@@ -154,7 +154,7 @@
               type="button"
               @click="fillTestCredentials"
               :disabled="loading"
-              class="w-full bg-gradient-to-r from-yellow-500 to-orange-500 text-white py-3 px-6 rounded-xl font-medium hover:from-yellow-600 hover:to-orange-600 transition-all transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none shadow-lg"
+              class="w-full bg-gradient-to-r from-gray-400 to-gray-500 text-white py-3 px-6 rounded-xl font-medium hover:from-gray-600 hover:to-gray-600 transition-all transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none shadow-lg"
             >
               🧪 Usar Credenciales de Prueba
             </button>
@@ -174,8 +174,16 @@
           <button
             @click="handleGoogleLogin"
             :disabled="loading"
-            class="w-full bg-white border border-gray-300 text-gray-700 py-3 px-6 rounded-xl font-medium hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-3 shadow-sm"
+            class="w-full bg-white border border-gray-300 text-gray-700 py-3 px-6 rounded-xl font-medium hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-3 shadow-sm relative group"
+            title="🚧 Inicio de sesión con Google - Próximamente"
           >
+            <!-- Coming Soon Badge -->
+            <div
+              class="absolute -top-2 -right-2 bg-gradient-to-r from-purple-500 to-blue-500 text-white text-xs px-2 py-1 rounded-full font-medium shadow-sm"
+            >
+              Próximamente
+            </div>
+
             <svg class="w-5 h-5" viewBox="0 0 24 24">
               <path
                 fill="#4285F4"
@@ -305,17 +313,17 @@ const handleGoogleLogin = async () => {
     loading.value = true
     error.value = ''
 
-    const result = await authStore.signInWithGoogle()
+    // Show "Coming soon" toast instead of attempting authentication
+    toast.info('🚧 Inicio de sesión con Google - Próximamente', {
+      description: 'Esta funcionalidad estará disponible en las próximas versiones',
+      duration: 4000,
+    })
 
-    if (result.success) {
-      toast.success('Redirigiendo a Google...')
-    } else {
-      error.value = result.error || 'Error al iniciar sesión con Google'
-      toast.error('Error al iniciar sesión con Google')
-    }
+    // Simulate loading for better UX
+    await new Promise((resolve) => setTimeout(resolve, 1000))
   } catch (err) {
-    error.value = 'Error inesperado al iniciar sesión con Google'
-    toast.error('Error inesperado al iniciar sesión con Google')
+    error.value = 'Error inesperado'
+    toast.error('Error inesperado')
     console.error('Google login error:', err)
   } finally {
     loading.value = false

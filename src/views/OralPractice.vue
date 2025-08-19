@@ -231,8 +231,6 @@ onMounted(() => {
             <LogOut class="w-4 h-4 mr-2" />
             Salir de Sala
           </Button>
-
-          <LingoCharacter variant="teaching" class="w-8 h-8 sm:w-10 sm:h-10" :animated="true" />
         </div>
       </div>
 
@@ -354,13 +352,9 @@ onMounted(() => {
                 Estadísticas
               </h3>
               <div class="space-y-3">
-                <div class="flex justify-between">
+                <div class="flex justify-between mb-4">
                   <span class="text-sm text-gray-600">Mensajes enviados:</span>
                   <span class="text-sm font-medium text-gray-900">{{ userMessageCount }}</span>
-                </div>
-                <div class="flex justify-between">
-                  <span class="text-sm text-gray-600">Velocidad de reproducción:</span>
-                  <span class="text-sm font-medium text-gray-900">{{ store.playbackSpeed }}x</span>
                 </div>
               </div>
             </div>
