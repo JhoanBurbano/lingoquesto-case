@@ -24,6 +24,17 @@ import MetricCard from '@/components/MetricCard.vue'
 import LingoCharacter from '@/components/atoms/LingoCharacter.vue'
 import DecorativePattern from '@/components/atoms/DecorativePattern.vue'
 import { getStudentInitials } from '@/utils/studentsTools'
+import Input from '@/components/atoms/Input.vue'
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from '@/components/atoms/Select'
+import { Medal } from 'lucide-vue-next'
+import Avatar from '@/components/atoms/Avatar/Avatar.vue'
+import AvatarFallback from '@/components/atoms/Avatar/AvatarFallback.vue'
 
 defineOptions({ name: 'AchievementsView' })
 
@@ -35,6 +46,7 @@ const activeTab = ref('ranking')
 const isAssignBadgeOpen = ref(false)
 const selectedStudentForBadge = ref('')
 const selectedBadgeForAssignment = ref('')
+const isAssigningBadge = ref(false)
 
 // Tabs
 const tabs = [
@@ -412,6 +424,7 @@ const assignBadge = (badge: { id: string }) => {
 
 const confirmAssignBadge = () => {
   if (selectedStudentForBadge.value && selectedBadgeForAssignment.value) {
+    isAssigningBadge.value = true
     // Aquí se implementaría la lógica para asignar el badge
     const student = studentAchievements.value.find(
       (s) => s.studentId === selectedStudentForBadge.value,
@@ -419,6 +432,15 @@ const confirmAssignBadge = () => {
     const badge = badges.find((b) => b.id === selectedBadgeForAssignment.value)
 
     if (student && badge) {
+      // Verificar si el estudiante ya tiene esta insignia
+      const alreadyHasBadge = student.badges.some((b) => b.badgeId === badge.id)
+
+      if (alreadyHasBadge) {
+        toast.error(`${student.studentName} ya tiene la insignia "${badge.name}"`)
+        isAssigningBadge.value = false
+        return
+      }
+
       // Agregar el badge al estudiante
       student.badges.push({
         badgeId: badge.id,
@@ -427,12 +449,14 @@ const confirmAssignBadge = () => {
       })
       student.totalBadges++
 
-      toast.success(`Insignia "${badge.name}" asignada a ${student.studentName}`)
-    }
+      toast.success(`🎉 ¡Insignia "${badge.name}" asignada exitosamente a ${student.studentName}!`)
 
-    isAssignBadgeOpen.value = false
-    selectedStudentForBadge.value = ''
-    selectedBadgeForAssignment.value = ''
+      // Cerrar modal y resetear estado
+      isAssignBadgeOpen.value = false
+      selectedStudentForBadge.value = ''
+      selectedBadgeForAssignment.value = ''
+      isAssigningBadge.value = false
+    }
   }
 }
 </script>
@@ -514,7 +538,7 @@ const confirmAssignBadge = () => {
               <Search
                 class="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
               />
-              <input
+              <Input
                 v-model="searchQuery"
                 type="text"
                 placeholder="Buscar estudiantes o badges..."
@@ -524,30 +548,38 @@ const confirmAssignBadge = () => {
           </div>
 
           <div class="flex gap-2">
-            <select
-              v-model="selectedCategory"
-              class="px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#967AFE]/20 focus:border-[#967AFE]"
-            >
-              <option value="all">Todas las categorías</option>
-              <option value="oral">Práctica Oral</option>
-              <option value="progress">Progreso</option>
-              <option value="participation">Participación</option>
-              <option value="special">Especiales</option>
-            </select>
-
-            <select
-              v-model="selectedStudent"
-              class="px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#967AFE]/20 focus:border-[#967AFE]"
-            >
-              <option value="">Todos los estudiantes</option>
-              <option
-                v-for="student in studentAchievements"
-                :key="student.studentId"
-                :value="student.studentId"
+            <Select v-model="selectedCategory">
+              <SelectTrigger
+                class="px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#967AFE]/20 focus:border-[#967AFE]"
               >
-                {{ student.studentName }}
-              </option>
-            </select>
+                <SelectValue placeholder="Todas las categorías" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todas las categorías</SelectItem>
+                <SelectItem value="oral">Práctica Oral</SelectItem>
+                <SelectItem value="progress">Progreso</SelectItem>
+                <SelectItem value="participation">Participación</SelectItem>
+                <SelectItem value="special">Especiales</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Select v-model="selectedStudent">
+              <SelectTrigger
+                class="px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#967AFE]/20 focus:border-[#967AFE]"
+              >
+                <SelectValue placeholder="Todos los estudiantes" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">Todos los estudiantes</SelectItem>
+                <SelectItem
+                  v-for="student in studentAchievements"
+                  :key="student.studentId"
+                  :value="student.studentId"
+                >
+                  {{ student.studentName }}
+                </SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </div>
       </div>
@@ -707,11 +739,16 @@ const confirmAssignBadge = () => {
                   >
                     {{ index + 1 }}
                   </div>
-                  <div
-                    class="w-12 h-12 bg-gradient-to-br from-[#967AFE] to-[#48D19C] rounded-full flex items-center justify-center text-white font-bold"
-                  >
-                    {{ getStudentInitials(student.studentName) }}
-                  </div>
+
+                  <!-- Avatar del estudiante con iniciales -->
+                  <Avatar class="w-12 h-12">
+                    <AvatarFallback
+                      class="bg-gradient-to-br from-[#967AFE] to-[#48D19C] text-white font-bold text-lg"
+                    >
+                      {{ getStudentInitials(student.studentName) }}
+                    </AvatarFallback>
+                  </Avatar>
+
                   <div>
                     <h5 class="font-semibold text-gray-900">{{ student.studentName }}</h5>
                     <div class="flex items-center gap-2 mt-1">
@@ -795,12 +832,17 @@ const confirmAssignBadge = () => {
                 <!-- Header del estudiante -->
                 <div class="p-6 border-b border-gray-100">
                   <div class="flex items-center gap-4 mb-4">
-                    <div
-                      class="w-16 h-16 rounded-full flex items-center justify-center text-white font-bold text-xl"
-                      :class="getLevelColor(student.level).bg"
-                    >
-                      {{ getStudentInitials(student.studentName) }}
-                    </div>
+                    <Avatar class="w-16 h-16">
+                      <AvatarFallback
+                        :class="[
+                          getLevelColor(student.level).bg,
+                          getLevelColor(student.level).text,
+                          'font-bold text-xl',
+                        ]"
+                      >
+                        {{ getStudentInitials(student.studentName) }}
+                      </AvatarFallback>
+                    </Avatar>
                     <div class="flex-1">
                       <h4 class="text-lg font-semibold text-gray-900">{{ student.studentName }}</h4>
                       <div class="flex items-center gap-2 mt-1">
@@ -923,51 +965,226 @@ const confirmAssignBadge = () => {
       class="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
       @click="isAssignBadgeOpen = false"
     >
-      <div class="bg-white rounded-2xl p-6 w-full max-w-md mx-4" @click.stop>
-        <h3 class="text-lg font-semibold text-gray-900 mb-4">Asignar Insignia</h3>
+      <div
+        class="bg-white rounded-2xl p-6 w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto"
+        @click.stop
+      >
+        <div class="flex items-center justify-between mb-6">
+          <h3 class="text-xl font-semibold text-gray-900">Asignar Insignia</h3>
+          <button
+            @click="isAssignBadgeOpen = false"
+            class="text-gray-400 hover:text-gray-600 transition-colors"
+          >
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M6 18L18 6M6 6l12 12"
+              />
+            </svg>
+          </button>
+        </div>
 
-        <div class="space-y-4">
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">Estudiante</label>
-            <select
-              v-model="selectedStudentForBadge"
-              class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#967AFE]/20 focus:border-[#967AFE]"
-            >
-              <option value="">Seleccionar estudiante</option>
-              <option
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <!-- Selección de Estudiante -->
+          <div class="space-y-4">
+            <h4 class="font-medium text-gray-900">Seleccionar Estudiante</h4>
+
+            <div class="space-y-3 max-h-64 overflow-y-auto">
+              <div
                 v-for="student in studentAchievements"
                 :key="student.studentId"
-                :value="student.studentId"
+                @click="selectedStudentForBadge = student.studentId"
+                class="flex items-center gap-3 p-3 rounded-xl border-2 cursor-pointer transition-all duration-200 hover:bg-gray-50"
+                :class="[
+                  selectedStudentForBadge === student.studentId
+                    ? 'border-purple-500 bg-purple-50 shadow-md'
+                    : 'border-gray-200 hover:border-purple-300',
+                ]"
               >
-                {{ student.studentName }}
-              </option>
-            </select>
+                <!-- Avatar del estudiante -->
+                <div
+                  class="w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-lg bg-gradient-to-br from-[#967AFE] to-[#48D19C]"
+                >
+                  {{ getStudentInitials(student.studentName) }}
+                </div>
+
+                <!-- Información del estudiante -->
+                <div class="flex-1">
+                  <h5 class="font-semibold text-gray-900">{{ student.studentName }}</h5>
+                  <div class="flex items-center gap-2 mt-1">
+                    <Badge
+                      :class="[
+                        getLevelColor(student.level).bg,
+                        getLevelColor(student.level).text,
+                        getLevelColor(student.level).border,
+                      ]"
+                    >
+                      {{ student.level }}
+                    </Badge>
+                    <span class="text-sm text-gray-600">{{ student.points }} pts</span>
+                  </div>
+                  <div class="text-xs text-purple-600 font-medium mt-1">
+                    {{ student.totalBadges }} insignias ganadas
+                  </div>
+                </div>
+
+                <!-- Check de selección -->
+                <div
+                  v-if="selectedStudentForBadge === student.studentId"
+                  class="w-6 h-6 bg-purple-500 rounded-full flex items-center justify-center"
+                >
+                  <CheckCircle class="w-4 h-4 text-white" />
+                </div>
+              </div>
+            </div>
           </div>
 
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">Insignia</label>
-            <select
-              v-model="selectedBadgeForAssignment"
-              class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#967AFE]/20 focus:border-[#967AFE]"
-            >
-              <option value="">Seleccionar insignia</option>
-              <option v-for="badge in badges" :key="badge.id" :value="badge.id">
-                {{ badge.name }}
-              </option>
-            </select>
+          <!-- Selección de Insignia -->
+          <div class="space-y-4">
+            <h4 class="font-medium text-gray-900">Seleccionar Insignia</h4>
+
+            <div class="space-y-3 max-h-64 overflow-y-auto">
+              <div
+                v-for="badge in badges"
+                :key="badge.id"
+                @click="selectedBadgeForAssignment = badge.id"
+                class="flex items-center gap-3 p-3 rounded-xl border-2 cursor-pointer transition-all duration-200 hover:bg-gray-50"
+                :class="[
+                  selectedBadgeForAssignment === badge.id
+                    ? 'border-purple-500 bg-purple-50 shadow-md'
+                    : 'border-gray-200 hover:border-purple-300',
+                ]"
+              >
+                <!-- Icono de la insignia -->
+                <div
+                  class="w-12 h-12 rounded-xl flex items-center justify-center text-white"
+                  :class="`bg-gradient-to-r ${badge.gradient}`"
+                >
+                  <component :is="badge.icon" class="w-6 h-6" />
+                </div>
+
+                <!-- Información de la insignia -->
+                <div class="flex-1">
+                  <h5 class="font-semibold text-gray-900">{{ badge.name }}</h5>
+                  <p class="text-sm text-gray-600 mt-1">{{ badge.description }}</p>
+                  <div class="flex items-center gap-2 mt-2">
+                    <Badge
+                      :class="[
+                        getRarityColor(badge.rarity).bg,
+                        getRarityColor(badge.rarity).text,
+                        getRarityColor(badge.rarity).border || '',
+                        getRarityColor(badge.rarity).glow || '',
+                      ]"
+                    >
+                      {{ getRarityColor(badge.rarity).label }}
+                    </Badge>
+                    <Badge class="bg-gray-100 text-gray-700">
+                      {{ badge.category }}
+                    </Badge>
+                  </div>
+                </div>
+
+                <!-- Check de selección -->
+                <div
+                  v-if="selectedBadgeForAssignment === badge.id"
+                  class="w-6 h-6 bg-purple-500 rounded-full flex items-center justify-center"
+                >
+                  <CheckCircle class="w-4 h-4 text-white" />
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
-        <div class="flex gap-3 mt-6">
+        <!-- Preview de la asignación -->
+        <div
+          v-if="selectedStudentForBadge && selectedBadgeForAssignment"
+          class="mt-6 p-4 bg-gradient-to-r from-purple-50 to-blue-50 rounded-xl border border-purple-200"
+        >
+          <h4 class="font-medium text-gray-900 mb-3">Vista Previa de la Asignación</h4>
+          <div class="flex items-center justify-between">
+            <!-- Estudiante seleccionado -->
+            <div class="flex items-center gap-3">
+              <div
+                class="w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-lg bg-gradient-to-br from-[#967AFE] to-[#48D19C]"
+              >
+                {{
+                  getStudentInitials(
+                    studentAchievements.find((s) => s.studentId === selectedStudentForBadge)
+                      ?.studentName || '',
+                  )
+                }}
+              </div>
+              <div>
+                <h5 class="font-semibold text-gray-900">
+                  {{
+                    studentAchievements.find((s) => s.studentId === selectedStudentForBadge)
+                      ?.studentName
+                  }}
+                </h5>
+                <p class="text-sm text-gray-600">
+                  Recibirá la insignia:
+                  <span class="font-medium text-purple-700">
+                    {{ badges.find((b) => b.id === selectedBadgeForAssignment)?.name }}
+                  </span>
+                </p>
+              </div>
+            </div>
+
+            <!-- Insignia a asignar -->
+            <div class="flex items-center gap-3">
+              <div
+                class="w-16 h-16 rounded-xl flex items-center justify-center text-white shadow-lg"
+                :class="`bg-gradient-to-r ${badges.find((b) => b.id === selectedBadgeForAssignment)?.gradient}`"
+              >
+                <component
+                  :is="badges.find((b) => b.id === selectedBadgeForAssignment)?.icon || Award"
+                  class="w-8 h-8"
+                />
+              </div>
+              <div class="text-right">
+                <p class="text-sm text-gray-600">Asignar como</p>
+                <p class="font-semibold text-purple-700">Profesor</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Botones de acción -->
+        <div class="flex gap-3 mt-6 pt-4 border-t border-gray-200">
           <Button @click="isAssignBadgeOpen = false" variant="outline" class="flex-1">
             Cancelar
           </Button>
           <Button
             @click="confirmAssignBadge"
-            :disabled="!selectedStudentForBadge || !selectedBadgeForAssignment"
+            :disabled="!selectedStudentForBadge || !selectedBadgeForAssignment || isAssigningBadge"
             class="flex-1 bg-gradient-to-r from-[#967AFE] to-[#48D19C] text-white hover:opacity-90"
           >
-            Asignar
+            <CheckCircle v-if="!isAssigningBadge" class="w-4 h-4 mr-2" />
+            <svg
+              v-else
+              class="animate-spin -ml-1 mr-3 h-4 w-4 text-white"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <circle
+                class="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                stroke-width="4"
+              ></circle>
+              <path
+                class="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+              ></path>
+            </svg>
+            {{ isAssigningBadge ? 'Asignando...' : 'Asignar Insignia' }}
           </Button>
         </div>
       </div>

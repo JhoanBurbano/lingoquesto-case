@@ -34,9 +34,63 @@ export interface Student {
   }>
 }
 
+// Función para calcular métricas coherentes
+function calculateCoherentMetrics(student: Student) {
+  const level = student.level
+
+  // Metas semanales por nivel
+  const weeklyGoals = {
+    A1: { hours: 5, activities: 8, sessions: 4 },
+    A2: { hours: 7, activities: 10, sessions: 5 },
+    B1: { hours: 10, activities: 12, sessions: 6 },
+    B2: { hours: 12, activities: 15, sessions: 7 },
+  }
+
+  // Calcular horas de práctica semanal coherentes
+  const weeklyPracticeHours = Math.min(
+    student.oralPracticeHours,
+    weeklyGoals[level].hours * (student.streak / 7),
+  )
+
+  // Calcular fluidez coherente basada en práctica real
+  const calculatedFluency = Math.min(
+    100,
+    Math.max(
+      0,
+      Math.round(
+        weeklyPracticeHours * 2.5 + // 2.5 puntos por hora
+          (student.activitiesCompleted / student.totalActivities) * 30 + // 30 puntos por actividades
+          student.streak * 2, // 2 puntos por día de racha
+      ),
+    ),
+  )
+
+  // Calcular pronunciación coherente
+  const calculatedPronunciation = Math.min(
+    100,
+    Math.max(
+      0,
+      Math.round(
+        weeklyPracticeHours * 2.0 + // 2.0 puntos por hora
+          (student.activitiesCompleted / student.totalActivities) * 25 + // 25 puntos por actividades
+          student.streak * 1.5, // 1.5 puntos por día de racha
+      ),
+    ),
+  )
+
+  // Actualizar el estudiante con métricas coherentes
+  return {
+    ...student,
+    oralPracticeHours: weeklyPracticeHours,
+    fluencyScore: calculatedFluency,
+    pronunciationScore: calculatedPronunciation,
+    weeklyGoal: weeklyGoals[level].hours,
+  }
+}
+
 export const STUDENTS_DATA: Student[] = [
   // ESTUDIANTES CON BUEN PROGRESO (6 estudiantes - 50%)
-  {
+  calculateCoherentMetrics({
     id: '1',
     name: 'Susana Casas',
     email: 'susana.casas@email.com',
@@ -84,8 +138,8 @@ export const STUDENTS_DATA: Student[] = [
         score: 90,
       },
     ],
-  },
-  {
+  }),
+  calculateCoherentMetrics({
     id: '2',
     name: 'María González',
     email: 'maria.gonzalez@email.com',
@@ -121,8 +175,8 @@ export const STUDENTS_DATA: Student[] = [
       { id: '5', date: 'Hoy', duration: '4:22', topic: 'Opinión sobre tecnología', score: 94 },
       { id: '6', date: 'Ayer', duration: '3:15', topic: 'Experiencia de viaje', score: 91 },
     ],
-  },
-  {
+  }),
+  calculateCoherentMetrics({
     id: '3',
     name: 'Carlos Mendoza',
     email: 'carlos.mendoza@email.com',
@@ -162,8 +216,8 @@ export const STUDENTS_DATA: Student[] = [
       { id: '7', date: 'Hoy', duration: '2:10', topic: 'Mi comida favorita', score: 86 },
       { id: '8', date: 'Ayer', duration: '1:55', topic: 'Actividades de fin de semana', score: 83 },
     ],
-  },
-  {
+  }),
+  calculateCoherentMetrics({
     id: '4',
     name: 'Andrea Ruiz',
     email: 'andrea.ruiz@email.com',
@@ -199,8 +253,8 @@ export const STUDENTS_DATA: Student[] = [
       { id: '9', date: 'Hoy', duration: '3:45', topic: 'Cambios en mi ciudad', score: 89 },
       { id: '10', date: 'Ayer', duration: '2:50', topic: 'Libro que me gustó', score: 87 },
     ],
-  },
-  {
+  }),
+  calculateCoherentMetrics({
     id: '5',
     name: 'Roberto Silva',
     email: 'roberto.silva@email.com',
@@ -239,8 +293,8 @@ export const STUDENTS_DATA: Student[] = [
       { id: '11', date: 'Hoy', duration: '1:45', topic: 'Mi trabajo diario', score: 83 },
       { id: '12', date: 'Ayer', duration: '2:00', topic: 'Planes de vacaciones', score: 81 },
     ],
-  },
-  {
+  }),
+  calculateCoherentMetrics({
     id: '6',
     name: 'Lucía Herrera',
     email: 'lucia.herrera@email.com',
@@ -286,10 +340,10 @@ export const STUDENTS_DATA: Student[] = [
       },
       { id: '14', date: 'Ayer', duration: '4:15', topic: 'Sostenibilidad ambiental', score: 94 },
     ],
-  },
+  }),
 
   // ESTUDIANTES CON PROGRESO MEDIO (3 estudiantes - 25%)
-  {
+  calculateCoherentMetrics({
     id: '7',
     name: 'David Garzón',
     email: 'david.garzon@email.com',
@@ -329,8 +383,8 @@ export const STUDENTS_DATA: Student[] = [
       { id: '15', date: 'Ayer', duration: '1:20', topic: 'Saludos y presentación', score: 72 },
       { id: '16', date: '3 días', duration: '1:05', topic: 'Números y fechas', score: 68 },
     ],
-  },
-  {
+  }),
+  calculateCoherentMetrics({
     id: '8',
     name: 'Patricia Moreno',
     email: 'patricia.moreno@email.com',
@@ -370,8 +424,8 @@ export const STUDENTS_DATA: Student[] = [
       { id: '17', date: '2 días', duration: '1:50', topic: 'Mi familia', score: 74 },
       { id: '18', date: '4 días', duration: '1:35', topic: 'Mi casa', score: 71 },
     ],
-  },
-  {
+  }),
+  calculateCoherentMetrics({
     id: '9',
     name: 'Fernando López',
     email: 'fernando.lopez@email.com',
@@ -411,10 +465,10 @@ export const STUDENTS_DATA: Student[] = [
       { id: '19', date: 'Ayer', duration: '2:35', topic: 'Experiencias de trabajo', score: 78 },
       { id: '20', date: '3 días', duration: '2:15', topic: 'Viaje memorable', score: 75 },
     ],
-  },
+  }),
 
   // ESTUDIANTES CON MAL PROGRESO (3 estudiantes - 25%)
-  {
+  calculateCoherentMetrics({
     id: '10',
     name: 'Miguel Torres',
     email: 'miguel.torres@email.com',
@@ -451,8 +505,8 @@ export const STUDENTS_DATA: Student[] = [
       { id: '21', date: '1 semana', duration: '0:45', topic: 'Presentación básica', score: 48 },
       { id: '22', date: '2 semanas', duration: '0:30', topic: 'Números', score: 45 },
     ],
-  },
-  {
+  }),
+  calculateCoherentMetrics({
     id: '11',
     name: 'Carmen Jiménez',
     email: 'carmen.jimenez@email.com',
@@ -489,8 +543,8 @@ export const STUDENTS_DATA: Student[] = [
       { id: '23', date: '5 días', duration: '0:55', topic: 'Mi nombre', score: 55 },
       { id: '24', date: '1 semana', duration: '0:40', topic: 'Colores favoritos', score: 52 },
     ],
-  },
-  {
+  }),
+  calculateCoherentMetrics({
     id: '12',
     name: 'Alberto Vega',
     email: 'alberto.vega@email.com',
@@ -531,7 +585,7 @@ export const STUDENTS_DATA: Student[] = [
       { id: '25', date: '4 días', duration: '1:10', topic: 'Mi día típico', score: 61 },
       { id: '26', date: '1 semana', duration: '1:25', topic: 'Mi familia', score: 58 },
     ],
-  },
+  }),
 ]
 
 // Función para obtener estudiantes por categoría
