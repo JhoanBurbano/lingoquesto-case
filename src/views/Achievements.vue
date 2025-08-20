@@ -456,7 +456,7 @@ const confirmAssignBadge = () => {
 
         <Button
           @click="isAssignBadgeOpen = true"
-          class="bg-gradient-to-r from-[#967AFE] to-[#48D19C] text-white hover:opacity-90"
+          class="bg-gradient-to-r from-[#967AFE] to-[#48D19C] text-white hover:opacity-90 z-10"
         >
           <Plus class="w-4 h-4 mr-2" />
           Asignar Insignia
