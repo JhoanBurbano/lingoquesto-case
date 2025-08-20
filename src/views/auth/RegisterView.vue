@@ -102,7 +102,12 @@
               </label>
               <div class="grid grid-cols-2 gap-3">
                 <label
-                  class="relative flex cursor-pointer rounded-xl border border-gray-200 p-4 hover:bg-purple-50 focus:outline-none"
+                  class="relative flex cursor-pointer rounded-xl border-2 transition-all duration-200 hover:bg-purple-50 focus:outline-none"
+                  :class="[
+                    form.role === 'student'
+                      ? 'border-purple-500 bg-purple-50 shadow-md'
+                      : 'border-gray-200 hover:border-purple-300',
+                  ]"
                 >
                   <input
                     v-model="form.role"
@@ -112,7 +117,7 @@
                     class="sr-only"
                     :disabled="loading"
                   />
-                  <div class="flex w-full items-center justify-between">
+                  <div class="flex w-full items-center justify-between p-4">
                     <div class="flex items-center">
                       <div class="text-sm">
                         <p class="font-medium text-gray-900">Estudiante</p>
@@ -125,13 +130,15 @@
                       </svg>
                     </div>
                   </div>
-                  <div
-                    class="absolute -inset-px rounded-xl border-2 border-transparent peer-checked:border-purple-500"
-                  ></div>
                 </label>
 
                 <label
-                  class="relative flex cursor-pointer rounded-xl border border-gray-200 p-4 hover:bg-purple-50 focus:outline-none"
+                  class="relative flex cursor-pointer rounded-xl border-2 transition-all duration-200 hover:bg-purple-50 focus:outline-none"
+                  :class="[
+                    form.role === 'teacher'
+                      ? 'border-purple-500 bg-purple-50 shadow-md'
+                      : 'border-gray-200 hover:border-purple-300',
+                  ]"
                 >
                   <input
                     v-model="form.role"
@@ -141,7 +148,7 @@
                     class="sr-only"
                     :disabled="loading"
                   />
-                  <div class="flex w-full items-center justify-between">
+                  <div class="flex w-full items-center justify-between p-4">
                     <div class="flex items-center">
                       <div class="text-sm">
                         <p class="font-medium text-gray-900">Profesor</p>
@@ -154,10 +161,23 @@
                       </svg>
                     </div>
                   </div>
-                  <div
-                    class="absolute -inset-px rounded-xl border-2 border-transparent peer-checked:border-purple-500"
-                  ></div>
                 </label>
+              </div>
+
+              <!-- Role Selection Indicator -->
+              <div
+                v-if="form.role"
+                class="mt-3 p-3 bg-purple-50 border border-purple-200 rounded-lg"
+              >
+                <div class="flex items-center space-x-2">
+                  <div class="w-2 h-2 bg-purple-500 rounded-full"></div>
+                  <span class="text-sm font-medium text-purple-700">
+                    Rol seleccionado:
+                    <span class="capitalize">{{
+                      form.role === 'teacher' ? 'Profesor' : 'Estudiante'
+                    }}</span>
+                  </span>
+                </div>
               </div>
             </div>
 
@@ -375,14 +395,21 @@ const handleRegister = async () => {
     return
   }
 
+  if (!form.role) {
+    error.value = 'Debes seleccionar un tipo de usuario'
+    return
+  }
+
   try {
     loading.value = true
     error.value = ''
 
-    const result = await authStore.signUp(form.email, form.password, form.fullName)
+    const result = await authStore.signUp(form.email, form.password, form.fullName, form.role)
 
     if (result.success) {
-      toast.success('¡Cuenta creada exitosamente!')
+      toast.success(
+        `¡Cuenta creada exitosamente como ${form.role === 'teacher' ? 'profesor' : 'estudiante'}!`,
+      )
       router.push('/dashboard')
     } else {
       error.value = result.error || 'Error al crear la cuenta'
