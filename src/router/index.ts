@@ -117,7 +117,7 @@ const routes: RouteRecordRaw[] = [
     meta: {
       title: 'Gestión de Estudiantes',
       requiresAuth: true,
-      allowedRoles: ['teacher', 'admin'],
+      allowedRoles: ['teacher', 'student', 'admin'],
       sectionName: 'Gestión de Estudiantes',
       description:
         'Un sistema completo para administrar la información de tus estudiantes, su progreso y actividades de manera eficiente.',
@@ -129,7 +129,7 @@ const routes: RouteRecordRaw[] = [
     meta: {
       title: 'Biblioteca de Actividades',
       requiresAuth: true,
-      allowedRoles: ['teacher', 'admin'],
+      allowedRoles: ['teacher', 'student', 'admin'],
       sectionName: 'Biblioteca de Actividades',
       description:
         'Crea, organiza y asigna actividades personalizadas para potenciar el aprendizaje de tus estudiantes.',
@@ -141,7 +141,7 @@ const routes: RouteRecordRaw[] = [
     meta: {
       title: 'Reportes Avanzados',
       requiresAuth: true,
-      allowedRoles: ['teacher', 'admin'],
+      allowedRoles: ['teacher', 'student', 'admin'],
       sectionName: 'Reportes Avanzados',
       description:
         'Genera reportes detallados sobre el progreso, participación y rendimiento de tus estudiantes.',
@@ -164,7 +164,7 @@ const routes: RouteRecordRaw[] = [
     meta: {
       title: 'Calendario Académico',
       requiresAuth: true,
-      allowedRoles: ['teacher', 'admin'],
+      allowedRoles: ['teacher', 'student', 'admin'],
       sectionName: 'Calendario Académico',
       description: 'Organiza clases, tareas y eventos importantes en un calendario inteligente.',
     },

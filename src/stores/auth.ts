@@ -144,7 +144,7 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  const createProfile = async () => {
+  const createProfile = async (role?: 'student' | 'teacher') => {
     if (!user.value) return
 
     try {
@@ -153,7 +153,7 @@ export const useAuthStore = defineStore('auth', () => {
         email: user.value.email!,
         full_name: user.value.user_metadata?.full_name || null,
         avatar_url: user.value.user_metadata?.avatar_url || null,
-        role: 'student', // Default role
+        role: role || user.value.user_metadata?.role || 'teacher', // Use selected role or fallback
       }
 
       const { data, error: createError } = await supabase
@@ -171,7 +171,12 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  const signUp = async (email: string, password: string, fullName?: string) => {
+  const signUp = async (
+    email: string,
+    password: string,
+    fullName?: string,
+    role?: 'student' | 'teacher',
+  ) => {
     try {
       loading.value = true
       error.value = null
@@ -182,6 +187,7 @@ export const useAuthStore = defineStore('auth', () => {
         options: {
           data: {
             full_name: fullName,
+            role: role,
           },
         },
       })
@@ -194,7 +200,7 @@ export const useAuthStore = defineStore('auth', () => {
         if (data.session) {
           saveSessionToStorage(data.session)
         }
-        await createProfile()
+        await createProfile(role)
       }
 
       return { success: true, user: data.user }
