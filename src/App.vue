@@ -1,22 +1,7 @@
 <template>
   <div id="app">
     <!-- Loading Screen -->
-    <div
-      v-if="authStore.loading || isRedirecting"
-      class="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-green-50 flex items-center justify-center"
-    >
-      <div class="text-center">
-        <div
-          class="w-20 h-20 bg-gradient-to-br from-purple-500 to-blue-600 rounded-2xl flex items-center justify-center shadow-lg mx-auto mb-6"
-        >
-          <span class="text-white text-2xl font-bold">LQ</span>
-        </div>
-        <div
-          class="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-500 mx-auto mb-4"
-        ></div>
-        <p class="text-gray-600">{{ loadingMessage }}</p>
-      </div>
-    </div>
+    <AppLoader v-if="authStore.loading || isRedirecting" :message="loadingMessage" />
 
     <!-- Public Routes (Welcome, Support, Auth) - Sin AppLayout -->
     <div v-else-if="isPublicRoute" class="min-h-screen">
@@ -38,6 +23,7 @@ import { onMounted, computed, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { Toaster } from 'vue-sonner'
 import AppLayout from './components/layouts/AppLayout.vue'
+import { AppLoader } from './components'
 import { useAuthStore } from './stores/auth'
 
 const authStore = useAuthStore()

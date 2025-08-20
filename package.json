@@ -26,6 +26,7 @@
     "setup:storage": "node scripts/setup-storage.js"
   },
   "dependencies": {
+    "@lottiefiles/dotlottie-vue": "^0.9.0",
     "@supabase/supabase-js": "^2.55.0",
     "@tailwindcss/vite": "^4.1.12",
     "@vueuse/motion": "^3.0.3",
@@ -33,6 +34,7 @@
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
     "embla-carousel": "^8.6.0",
+    "lottie-web": "^5.13.0",
     "lucide-vue-next": "^0.539.0",
     "pinia": "^3.0.3",
     "radix-vue": "^1.9.17",
